@@ -64,11 +64,9 @@ Plot the energy *vs.* cutoff energy data, and determine when the total energy is
 <details>
 <summary><b>Solution</b></summary>
 
-The threshold of 5 meV/atom corresponds to 10 meV/cell ≈ 7.4 × 10⁻⁴ Ry/cell for the 2-atom primitive cell. Beyond `ecutwfc = 80 Ry` the total energy never changes by more than this amount, so the energy is converged to within 5 meV/atom at **`ecutwfc ≈ 80 Ry`**.
+Beyond `ecutwfc = 80 Ry` the total energy never changes by more than the threshold, so the energy is converged to within 5 meV/atom at **`ecutwfc ≈ 80 Ry`**.
 
 ![Total energy vs ecutwfc](solutions/energy_vs_ecutwfc.png)
-
-The lower panel plots $|\Delta E|$ relative to the most accurate calculation on a log scale; the dashed line marks the 5 meV/atom threshold and the orange dot marks the converged cutoff.
 
 </details>
 
@@ -90,7 +88,7 @@ Plot the wall time as a function of the kinetic energy cutoff. Can you explain t
 <details>
 <summary><b>Solution</b></summary>
 
-The wall time grows superlinearly with `ecutwfc`. The number of plane waves scales as $E_\text{cut}^{3/2}$, and the cost of the operations performed on them (diagonalisation, FFTs, ...) scales worse than linearly in the number of plane waves, so the overall scaling is superlinear. The precise scaling depends on implementation details.
+The wall time grows superlinearly with `ecutwfc`. The number of plane waves scales as $E_\text{cut}^{3/2}$, and the cost of the operations performed on them (diagonalisation, FFTs, ...) scales worse than linearly in the number of plane waves, so the overall scaling is superlinear. (The precise scaling will depend on specific implementation details.)
 
 ![Wall time vs ecutwfc](solutions/timing_vs_ecutwfc.png)
 
@@ -109,7 +107,7 @@ In order to calculate forces, we first need to displace an atom from its equilib
 <details>
 <summary><b>Solution</b></summary>
 
-At the equilibrium geometry the forces on all atoms vanish by symmetry. Without displacing an atom there is nothing meaningful to converge — the force would be (numerically close to) zero regardless of the cutoff.
+At the equilibrium geometry the forces on all atoms vanish by symmetry. Without displacing an atom there is nothing meaningful to converge — the force would be zero regardless of the cutoff.
 
 </details>
 
@@ -133,8 +131,6 @@ Displace a Na (or Cl) atom by +0.05 in the *c* direction (fractional coordinates
 
 ![z-component of the force vs ecutwfc](solutions/forces_vs_ecutwfc.png)
 
-The lower panel plots $|\Delta F_z|$ relative to the most accurate calculation; the dashed line marks the 10 meV/Å threshold and the orange dot marks the converged cutoff. Note that the force does not converge as smoothly as the energy did (see Part C).
-
 </details>
 
 ### Part C
@@ -144,7 +140,7 @@ Do you see a trend in the forces with respect to the energy cutoff? If you see a
 <details>
 <summary><b>Solution</b></summary>
 
-Unlike total energies, forces are *not* guaranteed to converge monotonically with the cutoff. The variational principle bounds the total energy but says nothing about its derivatives, so the forces may oscillate before settling down.
+Unlike total energies, forces are *not* guaranteed to converge monotonically with the cutoff. The variational principle bounds the total energy but says nothing about its derivatives, so the forces may oscillate before converging.
 
 </details>
 
@@ -180,7 +176,7 @@ Converge the total energy with respect to the _**k**_-point mesh size to within 
 
 ![Total energy vs k-point grid](solutions/energy_vs_kpts.png)
 
-The lower panel plots $|\Delta E|$ relative to the most accurate calculation; the dashed line marks the 5 meV/atom threshold. The total energy is converged to within 5 meV/atom with a **4×4×4** grid.
+The total energy is converged to within 5 meV/atom with a **4×4×4** grid.
 
 </details>
 
@@ -247,8 +243,6 @@ Do total energies or forces tend to converge faster? Why?
 
 In practice the forces — or, equivalently, energy *differences* — converge faster than absolute total energies. For small displacements the convergence errors at the displaced and undisplaced geometries are highly correlated, so they largely cancel when you take the difference.
 
-Be careful about what "faster" means, though: convergence thresholds are arbitrary and depend on the units chosen. Tightening the force threshold (say to 5 µeV/atom) would demand a higher cutoff, but the underlying raw data — and the rate at which it approaches the true answer — would be unchanged.
-
 </details>
 
 ### Part C
@@ -269,7 +263,9 @@ Based on your convergence tests, state the values of `ecutwfc` and the _**k**_-p
 <details>
 <summary><b>Solution</b></summary>
 
-Choose the *smallest* `ecutwfc` and _**k**_-point grid that converge both energies and forces to the required thresholds. Picking an excessively large cutoff or grid defeats the purpose of convergence testing, which is to avoid unnecessary computational expense.
+`ecutwfc = 80 Ry` and _**k**_-point grid = `4 4 4`
+
+Note: don't be conservative and pick larger values. This defeats the purpose of convergence testing, which is to avoid unnecessary computational expense.
 
 </details>
 
@@ -290,7 +286,7 @@ Determine the equilibrium lattice parameter of NaCl by calculating its energy-ve
 <details>
 <summary><b>Solution</b></summary>
 
-Compute the total energy as a function of cell volume (or lattice parameter), plot it, and fit it to locate the minimum. The minimum gives the equilibrium lattice parameter. A parabolic fit gives $a_0 \approx 10.76$ Bohr ($\approx 5.70$ Å), close to the experimental value of 5.64 Å.
+Compute the total energy as a function of cell volume (or lattice parameter), plot it, and fit it to locate the minimum. The minimum gives the equilibrium lattice parameter. A (rough) parabolic fit gives $a_0 \approx 10.76$ Bohr.
 
 ![Energy vs cell volume](solutions/fit_parabolic_bulkmodulus.png)
 
@@ -318,10 +314,6 @@ Using the fact that pressure can be written as a derivative of energy with respe
 Pressure is $P = -\partial E/\partial V$, so
 
 $$ B = -V_0 \left.\frac{\partial P}{\partial V}\right|_{V_0} = V_0 \left.\frac{\partial^2 E}{\partial V^2}\right|_{V_0}. $$
-
-Approximating $E(V)$ to second order about the equilibrium volume, $E(V) \approx E_0 + \tfrac{1}{2} E''(V_0)(V - V_0)^2$, and evaluating the second derivative with three energies computed at $V_0$ and $V_0 \pm \Delta V$ gives the finite-difference formula
-
-$$ B = V_0\, \frac{E(V_0 + \Delta V) - 2 E(V_0) + E(V_0 - \Delta V)}{\Delta V^2}. $$
 
 </details>
 
@@ -390,7 +382,7 @@ Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan i
 <details>
 <summary><b>Solution</b></summary>
 
-Fitting the $E(V)$ data to the third-order Birch–Murnaghan equation of state gives $B \approx 24$ GPa, in good agreement with the second-order value.
+Fitting the $E(V)$ data to the third-order Birch–Murnaghan equation of state gives $B \approx 24$ GPa.
 
 ![Birch–Murnaghan fit of energy vs cell volume](solutions/fit_birchmurnaghan_bulkmodulus.png)
 
@@ -415,7 +407,13 @@ $$ \sigma_{ij} = \sum_{kl} C_{ijkl}\, \epsilon_{kl}, $$
 
 where $\sigma_{ij}$ is the stress tensor, $\epsilon_{kl} = \Delta L / L$ is the strain tensor, and $C_{ijkl}$ is the **stiffness tensor** — an intrinsic property of the material. This is a linear approximation, valid only for small strains.
 
-The stiffness tensor has 81 components, but symmetries of $\sigma$ and $\epsilon$ reduce this to 36, and the symmetry $C_{ij} = C_{ji}$ further reduces it to 21 independent components. Using **Voigt notation** (1=*xx*, 2=*yy*, 3=*zz*, 4=*yz*, 5=*zx*, 6=*xy*) we can write Hooke's law as a 6×6 matrix equation. **Cubic symmetry** (as in NaCl) reduces the independent components to just three: *C*₁₁, *C*₁₂, and *C*₄₄.
+The stiffness tensor has 81 components, but symmetries of $\sigma$ and $\epsilon$ reduce this to 36, and the symmetry $C_{ij} = C_{ji}$ further reduces it to 21 independent components. Using **Voigt notation** (1=*xx*, 2=*yy*, 3=*zz*, 4=*yz*, 5=*zx*, 6=*xy*) we can write Hooke's law as a 6×6 matrix equation,
+
+$$ \begin{pmatrix} \sigma_1 \cr \sigma_2 \cr \sigma_3 \cr \sigma_4 \cr \sigma_5 \cr \sigma_6 \end{pmatrix} = \begin{pmatrix} C_{11} & C_{12} & C_{13} & C_{14} & C_{15} & C_{16} \cr C_{12} & C_{22} & C_{23} & C_{24} & C_{25} & C_{26} \cr C_{13} & C_{23} & C_{33} & C_{34} & C_{35} & C_{36} \cr C_{14} & C_{24} & C_{34} & C_{44} & C_{45} & C_{46} \cr C_{15} & C_{25} & C_{35} & C_{45} & C_{55} & C_{56} \cr C_{16} & C_{26} & C_{36} & C_{46} & C_{56} & C_{66} \end{pmatrix} \begin{pmatrix} \epsilon_1 \cr \epsilon_2 \cr \epsilon_3 \cr \epsilon_4 \cr \epsilon_5 \cr \epsilon_6 \end{pmatrix}. $$
+
+**Cubic symmetry** (as in NaCl) reduces the independent components to just three — *C*₁₁, *C*₁₂, and *C*₄₄ — and the stiffness matrix takes the form
+
+$$ \mathbf{C} = \begin{pmatrix} C_{11} & C_{12} & C_{12} & 0 & 0 & 0 \cr C_{12} & C_{11} & C_{12} & 0 & 0 & 0 \cr C_{12} & C_{12} & C_{11} & 0 & 0 & 0 \cr 0 & 0 & 0 & C_{44} & 0 & 0 \cr 0 & 0 & 0 & 0 & C_{44} & 0 \cr 0 & 0 & 0 & 0 & 0 & C_{44} \end{pmatrix}. $$
 
 Strain is applied to the lattice vectors by
 
@@ -470,6 +468,14 @@ celldm(1) = |a'1|
 celldm(2) = |a'2| / |a'1|
 celldm(3) = |a'3| / |a'1|
 ```
+
+Applying the strain $\varepsilon$ to the cubic lattice vectors gives $|a'_1| = a(1+x)$, where `a` is the optimized lattice parameter from Problems 5 and 6. In your script you can therefore compute this `celldm` value for a given strain `x` with:
+
+```bash
+celldm1=$(echo "$a * (1 + $x)" | bc -l)
+```
+
+and the remaining `celldm` values follow analogously.
 
 > **Note**
 >
@@ -531,7 +537,7 @@ How much longer did the individual calculations on a conventional cell take comp
 <details>
 <summary><b>Solution</b></summary>
 
-The conventional cell has 4× as many atoms as the primitive cell (8 vs 2). Since the cost of DFT scales as $\mathcal{O}(N^3)$ in the number of electrons, each calculation is expected to be roughly $4^3 = 64\times$ more expensive *per _**k**_ point*. This is partially offset because the conventional cell has a smaller Brillouin zone and therefore needs fewer _**k**_ points for the same sampling density.
+The conventional cell has 4× as many atoms as the primitive cell (8 vs 2). Since the cost of DFT scales as $\mathcal{O}(N^3)$ in the number of electrons, each calculation is expected to be roughly $4^3 = 64\times$ more expensive *per _**k**_ point*. This could be partially offset if we used a smaller _**k**_-point grid (because the conventional cell has a smaller Brillouin zone and therefore needs fewer _**k**_ points for the same sampling density).
 
 </details>
 
@@ -557,7 +563,7 @@ In our convergence tests we ensured that total energies and forces were converge
 <details>
 <summary><b>Solution</b></summary>
 
-Forces (derivatives of the total energy) are a better — though still imperfect — proxy for lattice parameters, bulk moduli, and elastic constants than total energies, because all of these quantities depend on energy *derivatives*. The most direct choice would be to converge the derived quantities themselves, but in practice that is inefficient: the point of convergence testing is to use cheap proxies and so avoid expensive calculations.
+Forces (derivatives of the total energy) are a better — though still imperfect — proxy for lattice parameters, bulk moduli, and elastic constants than total energies, because all of these quantities depend on energy *derivatives*. The most direct choice would be to converge stresses, as this is the relevant second-order derivative. One might be tempted to converge the target properties themselves, but in practice that is inefficient: the point of convergence testing is to use cheap proxies and so avoid expensive calculations.
 
 </details>
 
@@ -568,15 +574,13 @@ Compare your computed lattice parameter, bulk modulus (calculated using both the
 <details>
 <summary><b>Solution</b></summary>
 
-Present a quantitative comparison — *e.g.* a table of computed values, experimental values, and percentage errors — citing multiple experimental sources for each property. Representative experimental values for NaCl are:
-
-| Property | Experiment |
-| --- | --- |
-| Lattice constant | 5.64 Å (Swanson & Tatge, 1953) |
-| Bulk modulus $B$ | 24.6 GPa (Whitfield *et al.*, 1976); 25.3 GPa (Kinoshita *et al.*, 1979) |
-| $C_{11}$ | 48.2 GPa (Whitfield, 1976); 51.6 GPa (Kinoshita, 1979) |
-| $C_{12}$ | 12.8 GPa (Whitfield, 1976); 12.2 GPa (Kinoshita, 1979) |
-| $C_{44}$ | 12.7 GPa (Whitfield, 1976); 13.6 GPa (Kinoshita, 1979) |
+| Property | This work (DFT) | Experiment |
+| --- | --- | --- |
+| Lattice constant (Å) | 5.69 | 5.64<sup>[1](#swanson1953)</sup> |
+| Bulk modulus $B$ (GPa) | 26 (parabolic); 24 (Birch–Murnaghan) | 24.6<sup>[2](#whitfield1976)</sup>; 25.3<sup>[3](#kinoshita1979)</sup> |
+| $C_{11}$ (GPa) | 47 | 48.2<sup>[2](#whitfield1976)</sup>; 51.6<sup>[3](#kinoshita1979)</sup> |
+| $C_{12}$ (GPa) | 12 | 12.8<sup>[2](#whitfield1976)</sup>; 12.2<sup>[3](#kinoshita1979)</sup> |
+| $C_{44}$ (GPa) | 12 | 12.7<sup>[2](#whitfield1976)</sup>; 13.6<sup>[3](#kinoshita1979)</sup> |
 
 For the bulk modulus, the Birch–Murnaghan value should agree with experiment better than the parabolic fit, especially if the parabolic fit is shaky.
 
@@ -589,9 +593,20 @@ Do we expect semi-local DFT to be able to predict these properties with high acc
 <details>
 <summary><b>Solution</b></summary>
 
-These are all ground-state properties, for which DFT is generally reliable. For example, across a wide range of materials the PBE functional gives a mean absolute relative error of about 4% in cell volumes — corresponding to roughly 1% in lattice parameters — so we expect semi-local DFT to perform reasonably well here.
+These are all ground-state properties, for which DFT is generally reliable. For example, across a wide range of materials the PBE functional gives a mean absolute relative error of about 4% in cell volumes<sup>[4](#isaacs2018)</sup> — corresponding to roughly 1% in lattice parameters — so we expect semi-local DFT to perform reasonably well here.
 
 </details>
+
+---
+
+## References
+
+1. <a id="swanson1953"></a>H. E. Swanson and R. K. Fuyat, *Standard X-ray Diffraction Powder Patterns*, Circular of the Bureau of Standards no. 539, Volume 2, National Bureau of Standards (1953). [archive.org](http://archive.org/details/circularofbureau5392swan)
+2. <a id="whitfield1976"></a>C. H. Whitfield, E. M. Brody, and W. A. Bassett, "Elastic moduli of NaCl by Brillouin scattering at high pressure in a diamond anvil cell", *Review of Scientific Instruments* **47**(8), 942–947 (1976). [doi:10.1063/1.1134778](https://doi.org/10.1063/1.1134778)
+3. <a id="kinoshita1979"></a>H. Kinoshita, N. Hamaya, and H. Fujisawa, "Elastic properties of single-crystal NaCl under high pressures to 80 kbar", *Journal of Physics of the Earth* **27**, 337–350 (1979).
+4. <a id="isaacs2018"></a>E. B. Isaacs and C. Wolverton, "Performance of the strongly constrained and appropriately normed density functional for solid-state materials", *Physical Review Materials* **2**, 063801 (2018). [doi:10.1103/PhysRevMaterials.2.063801](https://doi.org/10.1103/PhysRevMaterials.2.063801)
+
+---
 
 # TODO
 - [ ] band structures
