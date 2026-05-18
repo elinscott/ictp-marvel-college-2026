@@ -107,7 +107,7 @@ In order to calculate forces, we first need to displace an atom from its equilib
 <details>
 <summary><b>Solution</b></summary>
 
-At the equilibrium geometry the forces on all atoms vanish by symmetry. Without displacing an atom there is nothing meaningful to converge — the force would be zero regardless of the cutoff.
+For this structure, the forces on all atoms vanish by symmetry. Without displacing an atom there is nothing meaningful to converge — the force would be zero regardless of the cutoff.
 
 </details>
 
@@ -163,7 +163,7 @@ Look at the _**k**_ points listed in an output file (look for `number of k point
 <details>
 <summary><b>Solution</b></summary>
 
-The number of _**k**_ points reported in the output file is smaller than the number of points in the specified grid. `pw.x` uses the crystal symmetry to reduce the grid to the inequivalent points in the irreducible wedge of the Brillouin zone.
+The number of _**k**_ points reported in the output file is generally smaller than the number of points in the specified grid. `pw.x` uses the crystal symmetry to reduce the grid to the inequivalent points in the irreducible wedge of the Brillouin zone. (In unfortunate cases — for example, a shifted grid that is not compatible with the crystal symmetry — the reduced count can actually end up *larger* than for the corresponding unshifted grid.)
 
 </details>
 
@@ -230,7 +230,9 @@ Mathematically, what is the relationship between atomic forces and total energie
 
 The force on atom $I$ is minus the gradient of the total energy with respect to that atom's position:
 
-$$ \mathbf{F}_I = -\nabla_{\mathbf{R}_I} E. $$
+$$
+\mathbf{F}_I = -\nabla_{\mathbf{R}_I} E.
+$$
 
 </details>
 
