@@ -4,6 +4,8 @@ Materials for the hands-on sessions of the [Joint ICTP–MARVEL College: Materia
 
 Organized by Sara Bonella, Michele Ceriotti, Nicola Marzari, and Sandro Scandolo.
 
+Organizing assistants: Nicola Colonna, Edward Linscott, and Iurii Timrov.
+
 ## Contents
 
 `before/` contains instructions for you to follow _before_ you arrive in Trieste (installing `Quantum Mobile` and performing some basic tests)
