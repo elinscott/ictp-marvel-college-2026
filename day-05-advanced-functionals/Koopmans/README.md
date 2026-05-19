@@ -19,8 +19,9 @@ Any given Koopmans calculation requires several ingredients:
 
 ## Exercises
 
-- [`01-ozone/`](01-ozone/README.md) — Compute the ionisation potential and electron affinity of ozone using KI with the **ΔSCF** screening method.
-- [`02-zno-dfpt/`](02-zno-dfpt/README.md) — Compute the band structure of bulk ZnO using KI with the **DFPT** screening method.
+- [`01-ozone-by-hand/`](01-ozone-by-hand/README.md) — Compute a screening parameter for ozone "by hand", running the underlying `kcp.x` calculations directly and applying the screening formula yourself.
+- [`02-ozone-automated/`](02-ozone-automated/README.md) — Compute the ionisation potential and electron affinity of ozone using KI with the **ΔSCF** screening method, automated end-to-end with the `koopmans` package.
+- [`03-zno-dfpt/`](03-zno-dfpt/README.md) — Compute the band structure of bulk ZnO using KI with the **DFPT** screening method.
 
 > **Note**
 >

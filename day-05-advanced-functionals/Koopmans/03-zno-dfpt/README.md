@@ -1,4 +1,4 @@
-# Exercise 2: Band structure of bulk ZnO with KI and DFPT
+# Exercise 3: Band structure of bulk ZnO with KI and DFPT
 
 **Tutors**: Nicola Colonna and Edward Linscott
 
@@ -17,8 +17,6 @@ This exercise is adapted from [tutorial 3](https://koopmans-functionals.org/en/l
 
 - `zno.json` — the input file for the calculation
 - `plot_bandstructures.py` — a `python` script to plot the LDA and KI band structures side by side
-
----
 
 ## Problem 1: Understanding the input file
 
@@ -43,7 +41,7 @@ Open `zno.json` and locate the `workflow` block:
 
 ### Part A
 
-Compare this block against the one from Exercise 1. Identify and explain each difference:
+Compare this block against the one from Exercise 2. Identify and explain each difference:
 
 - `task: singlepoint` (we'll change this in Problems 2 and 3)
 - `base_functional: lda` instead of the default PBE
@@ -59,8 +57,6 @@ The `gb_correction` is the *Gygi–Baldereschi* correction, which accounts for t
 ### Part C
 
 Inspect the `calculator_parameters.w90` block. This sets up the Wannierization. Why are the projections split into multiple sub-lists (so-called "blocks")?
-
----
 
 ## Problem 2: The Wannierization
 
@@ -95,8 +91,6 @@ The Wannierization of the empty (Zn 4s) manifold uses two **disentanglement** ke
 >
 > When you run the same workflow more than once, `koopmans` will reuse intermediate results from previous runs by default. If you want to start from scratch, set `"from_scratch": true` in the `engine` block of `zno.json`.
 
----
-
 ## Problem 3: Running the KI calculation
 
 Now change `"task"` back to `"singlepoint"` and re-run
@@ -122,8 +116,6 @@ Contrast this workflow with the one you saw for ozone. In the DFPT workflow, whe
 ### Part B
 
 What is the role of `wann2kc`? Why is this conversion step needed when going from a Wannier90 output to a Koopmans calculation?
-
----
 
 ## Problem 4: Plotting and analysing the band structure
 
@@ -151,18 +143,14 @@ The KI calculation does not change the *shape* of the LDA band structure dramati
 
 By construction, the Koopmans correction depends on which orbital you are looking at — orbitals with $\alpha_i$ close to 1 are corrected strongly, while orbitals with $\alpha_i$ close to 0 are barely shifted. Look at the `alpha_guess` in `zno.json` and predict which manifolds of bands (Zn 3d–O 2p valence vs. Zn 4s conduction) get the largest correction. Verify your prediction against the plot.
 
----
-
 ## Problem 5: Take-aways
 
 ### Part A
 
-Summarise the differences between Exercise 1 (ozone, ΔSCF, KS orbitals) and Exercise 2 (ZnO, DFPT, Wannier orbitals). For each difference, explain *why* the choice is appropriate to the system.
+Summarise the differences between Exercise 2 (ozone, ΔSCF, KS orbitals) and Exercise 3 (ZnO, DFPT, Wannier orbitals). For each difference, explain *why* the choice is appropriate to the system.
 
 ### Part B
 
 In both exercises we obtained excellent agreement with experiment for a charged-excitation property (IP/EA for ozone; band gap for ZnO), starting from a semi-local DFT functional that on its own gives the wrong answer by several eV. What is the physical content of the screening parameters $\alpha_i$, and why does enforcing the Koopmans condition fix the eigenvalues so dramatically?
-
----
 
 [^Colonna2022]: N. Colonna, R. De Gennaro, E. Linscott, and N. Marzari, *Koopmans Spectral Functionals in Periodic Boundary Conditions*, J. Chem. Theory Comput. **18**, 5435 (2022). [doi:10.1021/acs.jctc.2c00161](https://doi.org/10.1021/acs.jctc.2c00161).

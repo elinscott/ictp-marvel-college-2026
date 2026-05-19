@@ -1,4 +1,4 @@
-# Exercise 1: Ionisation potential and electron affinity of ozone
+# Exercise 2: Ionisation potential and electron affinity of ozone
 
 **Tutors**: Nicola Colonna and Edward Linscott
 
@@ -9,8 +9,6 @@ In this exercise you will use the [`koopmans`](https://koopmans-functionals.org)
 - [`ozone.json`](ozone.json) — the input file for the calculation
 - [`read.ipynb`](read.ipynb) — a small `jupyter` notebook that extracts the IP and EA from the `koopmans` output
 - [`plot_spectrum.ipynb`](plot_spectrum.ipynb) — an incomplete `jupyter` notebook for plotting the orbital binding energies against experiment
-
----
 
 ## Problem 1: Understanding the input file
 
@@ -50,8 +48,6 @@ TODO
 
 </details>
 
----
-
 ## Problem 2: Running the calculation
 
 Run the workflow with
@@ -77,8 +73,6 @@ TODO
 
 </details>
 
----
-
 ## Problem 3: The initialization step
 
 You should see that the initialization phase runs **four** separate PBE calculations, all under `01-koopmans-dscf/01-initialization/`:
@@ -103,8 +97,6 @@ TODO
 
 </details>
 
----
-
 ## Problem 4: Calculating the screening parameters
 
 The second phase of the workflow computes one screening parameter $\alpha_i$ per orbital, using the ΔSCF method (see the lecture).
@@ -116,8 +108,6 @@ For each *filled* orbital $i$ (orbitals 1–9 of ozone), the code performs a sin
 ### Part A
 
 Select an orbital. Based on the contents of `01-ki` and `??-orbital-?/01-dft_n-1`, calculate by hand the value of the screening parameter.
-
-
 
 For the *empty* orbital 10, inside `01-iteration-1/11-orbital-10/` you will see three calculations rather than one:
 
@@ -157,8 +147,6 @@ In `ozone.json`, increase `alpha_numsteps` from `1` to `2` and re-run the workfl
 TODO
 
 </details>
-
----
 
 ## Problem 5: Extracting the IP and the EA
 
@@ -225,8 +213,6 @@ TODO
 
 </details>
 
----
-
 ## Problem 6: Comparing the full spectrum to experiment
 
 So far you have only looked at the HOMO and LUMO. The KI functional in fact predicts a binding energy for *every* occupied orbital, and these can be compared directly against gas-phase photoemission spectroscopy.
@@ -255,8 +241,6 @@ TODO
 
 </details>
 
----
-
 ## Problem 7: Take-aways
 
 A Koopmans calculation requires running many constrained DFT calculations — one per orbital (and even more for empty orbitals). What does this imply about how the cost of a ΔSCF Koopmans calculation scales with system size? What does it imply for *periodic* systems, where the variational orbitals are spread throughout the crystal and the supercell needs to be made large enough to host the constrained $N\pm1$ density?
@@ -269,7 +253,5 @@ The second exercise, on bulk ZnO, addresses exactly this issue by using a differ
 TODO
 
 </details>
-
----
 
 [^NIST]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).

@@ -1,0 +1,262 @@
+# Exercise 1: The screening parameter of ozone "by hand"
+
+**Tutors**: Nicola Colonna and Edward Linscott
+
+In this exercise you will perform a Koopmans-compliant KI calculation for the ozone molecule *by hand*, running each of the underlying `kcp.x` calculations yourself instead of letting the `koopmans` package orchestrate them.
+
+The aim is to demystify what a Koopmans calculation actually does: you will compute the optimal screening parameter $\alpha$ for the HOMO of ozone, and then use it to run a final KI calculation. Exercise 2 repeats the same physics with the `koopmans` package driving everything automatically — so keep this exercise in mind as a reference for what is happening "under the hood" there.
+
+By the end you will have:
+
+1. Run a DFT calculation for the neutral $N$-electron system.
+2. Restarted from the DFT orbitals and run a constrained DFT calculation for the $N{-}1$-electron system.
+3. Run a trial KI calculation with a guessed value of $\alpha$.
+4. Used the linearity of the KI eigenvalue in $\alpha$ to extract the *optimal* screening parameter.
+5. Prepared and run the final KI calculation at the optimal $\alpha$.
+
+## Files provided
+
+- [`ozone_dft.in`](ozone_dft.in) — `kcp.x` input for the neutral ($N$-electron) DFT calculation
+- [`ozone_dft_n-1.in`](ozone_dft_n-1.in) — `kcp.x` input for the constrained ($N{-}1$-electron) DFT calculation
+- [`ozone_ki.in`](ozone_ki.in) — `kcp.x` input for the trial KI calculation
+- [`get_alpha.sh`](get_alpha.sh) — a shell script that applies the screening formula from the lecture
+
+> **Note**
+>
+> All four calculations share the same `prefix` (`kc`) and `outdir` (`TMP/`), and communicate through restart files labelled by the `ndr`/`ndw` units. Run the steps below **in order** — each one reads the wavefunctions written by the previous one.
+
+## Problem 1: Setting up the environment
+
+Check that `kcp.x` is found:
+
+```bash
+workon koopmans
+which kcp.x
+```
+
+If `which` prints nothing, ask a tutor before continuing.
+
+## Problem 2: The neutral ($N$-electron) DFT calculation
+
+Run the DFT calculation for the neutral $N$-electron ozone molecule:
+
+```bash
+mpirun -np 2 kcp.x -in ozone_dft.in > ozone_dft.out
+```
+
+Check that the calculation completed successfully before continuing.
+
+### Part A
+
+Open `ozone_dft.in` and inspect the `&SYSTEM` block. The molecule has 18 valence electrons (`nelec = 18`), split evenly between the two spin channels. What does `do_orbdep = .false.` mean, and why is this a plain DFT calculation rather than a KI one?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+### Part B
+
+After the neutral calculation finishes, copy the Kohn–Sham orbitals so that they can be reused as the initial *variational* orbitals of the KI calculation:
+
+```bash
+cp TMP/kc_90.save/K00001/evc1.dat        TMP/kc_90.save/K00001/evc01.dat
+cp TMP/kc_90.save/K00001/evc2.dat        TMP/kc_90.save/K00001/evc02.dat
+cp TMP/kc_90.save/K00001/evc_empty1.dat  TMP/kc_90.save/K00001/evc0_empty1.dat
+cp TMP/kc_90.save/K00001/evc_empty2.dat  TMP/kc_90.save/K00001/evc0_empty2.dat
+```
+
+For molecules, the Kohn–Sham orbitals are used directly as the variational orbitals.
+
+## Problem 3: The charged ($N{-}1$-electron) DFT calculation
+
+Now run the DFT calculation for the charged system:
+
+```bash
+mpirun -np 2 kcp.x -in ozone_dft_n-1.in > ozone_dft_n-1.out
+```
+
+Again, make sure the calculation finishes correctly.
+
+### Part A
+
+Open `ozone_dft_n-1.in` and look at the three keywords in the `&SYSTEM` block:
+
+```fortran
+fixed_state  = .true.
+fixed_band   = 9
+f_cutoff     = 1e-05
+```
+
+Together these empty one specific orbital while keeping the rest of the density relaxed. Which orbital is being emptied, and why is it orbital 9?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+### Part B
+
+This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr = 90`). From `ozone_dft.out` and `ozone_dft_n-1.out`, read off the total energies $E^\text{DFT}[N]$ and $E^\text{DFT}[N{-}1]$. Their difference is a $\Delta$SCF estimate of the ionisation potential — what value do you get (in eV)?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+## Problem 4: The trial KI calculation
+
+The KI eigenvalue depends on the screening parameter $\alpha$. To pin down the optimal $\alpha$ we first need *one* trial KI calculation at a guessed value.
+
+Open `ozone_ki.in` and replace the `<alpha>` placeholder in the `&NKSIC` block with the trial value `0.7`:
+
+```fortran
+&NKSIC
+   nkscalfact         = 0.7
+   which_orbdep       = 'nki'
+   do_innerloop       = .false.
+   esic_conv_thr      = 1.8000000000000002e-08
+   do_innerloop_empty = .false.
+/
+```
+
+Then run the trial KI calculation:
+
+```bash
+mpirun -np 2 kcp.x -in ozone_ki.in > ozone_ki.out
+```
+
+### Part A
+
+This input has `do_orbdep = .true.` and `which_orbdep = 'nki'`, whereas `ozone_dft.in` had `do_orbdep = .false.`. What do these keywords switch on?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+### Part B
+
+Compare the HOMO eigenvalue in `ozone_ki.out` with the one in `ozone_dft.out`. The KI eigenvalue at $\alpha = 0$ is, by construction, equal to the DFT eigenvalue. How has the trial correction (at $\alpha = 0.7$) shifted the HOMO?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+## Problem 5: Extracting the optimal screening parameter
+
+The optimal $\alpha$ is the one that enforces the Koopmans condition on the HOMO,
+
+$$\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N{-}1] - E^\text{DFT}[N].$$
+
+The KI eigenvalue is *linear* in $\alpha$, and you already have two points on that line: the DFT calculation (which is the KI result at $\alpha = 0$) and the trial KI calculation (at $\alpha_0 = 0.7$). That is enough to solve for $\alpha_\text{opt}$.
+
+### Part A
+
+Using only $\varepsilon^\text{DFT}_\text{HOMO}$, $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$, $\alpha_0$, and the $\Delta$SCF target from Problem 3, work out $\alpha_\text{opt}$ by hand.
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+### Part B
+
+Verify your value by running the helper script, which applies exactly this formula to the output files:
+
+```bash
+sh get_alpha.sh
+```
+
+You can store the result in a shell variable and print it with
+
+```bash
+alpha=$(sh get_alpha.sh | tail -1)
+echo "optimal alpha = $alpha"
+```
+
+Open `get_alpha.sh` and check that the arithmetic on its last line matches the formula you derived in Part A. (Watch out for the factor `13.6057 * 2` — what unit conversion is that?)
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+## Problem 6: The final KI calculation
+
+Create a new input file `ozone_ki_opt.in` by copying `ozone_ki.in` and making two changes:
+
+1. Update the restart units so that the final run reads the trial KI wavefunctions and writes to a fresh unit:
+
+   ```fortran
+   ndr = 90
+   ndw = 92
+   ```
+
+2. Replace `nkscalfact` with the optimal value from Problem 5:
+
+   ```fortran
+   &NKSIC
+      nkscalfact         = <optimal_alpha>
+      which_orbdep       = 'nki'
+      do_innerloop       = .false.
+      esic_conv_thr      = 1.8000000000000002e-08
+      do_innerloop_empty = .false.
+   /
+   ```
+
+Then run the final KI calculation at the optimal screening parameter:
+
+```bash
+mpirun -np 2 kcp.x -in ozone_ki_opt.in > ozone_ki_opt.out
+```
+
+### Part A
+
+Read the HOMO eigenvalue from `ozone_ki_opt.out`. Does it now satisfy the Koopmans condition — that is, does $-\varepsilon^\text{KI}_\text{HOMO}$ agree with the $\Delta$SCF ionisation potential from Problem 3?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+### Part B
+
+Compare the KI ionisation potential against the DFT (PBE) value and the experimental value of ozone, IP ≈ 12.5 eV. What do you conclude about the accuracy of semi-local DFT and of the KI functional for charged excitations?
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
+
+## Problem 7: Take-aways
+
+In this exercise you computed a *single* screening parameter, for the HOMO, by running three explicit `kcp.x` calculations (neutral DFT, constrained $N{-}1$ DFT, trial KI) and applying the screening formula once.
+
+A full Koopmans calculation needs one screening parameter for *every* orbital, and the trial-KI/constrained-DFT loop is iterated to self-consistency. How many calculations would that require for ozone's ten orbitals? This is exactly the bookkeeping that the `koopmans` package automates — which is what you will see in Exercise 2.
+
+<details>
+<summary><b>Solution</b></summary>
+
+TODO
+
+</details>
