@@ -19,12 +19,12 @@ Any given Koopmans calculation requires several ingredients:
 
 ## Exercises
 
-- [`01-ozone/`](01-ozone/) — Compute the ionisation potential and electron affinity of ozone using KI with the **ΔSCF** screening method.
-- [`02-zno-dfpt/`](02-zno-dfpt/) — Compute the band structure of bulk ZnO using KI with the **DFPT** screening method.
+- [`01-ozone/`](01-ozone/README.md) — Compute the ionisation potential and electron affinity of ozone using KI with the **ΔSCF** screening method.
+- [`02-zno-dfpt/`](02-zno-dfpt/README.md) — Compute the band structure of bulk ZnO using KI with the **DFPT** screening method.
 
 > **Note**
 >
-> Before starting, check that `koopmans` is installed by running `koopmans --help` in your terminal. If you don't see a help message, ask a tutor.
+> Before starting, check that `koopmans` is installed by running `workon koopmans; koopmans --help` in your terminal. If you don't see a help message, ask a tutor.
 
 ## Further reading
 
