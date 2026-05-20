@@ -88,18 +88,25 @@ You should see that the initialization phase runs **four** separate PBE calculat
 04-dft_init_nspin2
 ```
 
-Why not just run a single `nspin = 2` PBE calculation? (Hint: ozone is a closed-shell molecule. What could go wrong?)
+In this procedure we solve the DFT problem with `nspin=1` (i.e. enforcing that the spin-up and spin-down densities match), do some bookkeeping that then ultimately allows us to perform a `nspin=2` calculation (i.e. no longer enforcing the matching between the spin-up and spin-down densities) starting from the `nspin=1` wavefunctions duplicated into both spin channels. 
+
+Why bother with this four-step initialization instead of running a single `nspin = 2` PBE calculation from scratch as we did in the previous exercise?
+
+<details>
+<summary><b>Solution</b></summary>
+
+For ozone (a closed-shell molecule) a direct `nspin = 2` run actually converges to the correct spin-restricted solution. The four-step protocol is there for two reasons:
+
+- **Safety:** in harder systems, an unrestricted `nspin = 2` calculation started from scratch can erroneously collapse into a spurious broken-symmetry spin-polarized solution. Initialising from a converged `nspin = 1` density reduces that risk by handing the `nspin = 2` calculation an already-symmetric starting point.
+- **Efficiency:** solving the `nspin = 1` problem is cheaper (half the wavefunctions), so most of the SCF cycles are done in the smaller problem; the `nspin = 2` calculation that follows starts from an already-converged density should finish quickly.
+
+</details>
+</br>
 
 > **Note**
 >
 > From this point onward in the workflow the density will not change. This is because the KI functional, by construction, gives back the same density as its base functional (here PBE). This is *not* true for KIPZ — there, the density does change.
 
-<details>
-<summary><b>Solution</b></summary>
-
-A direct `nspin = 2` PBE run starting from scratch on a closed-shell system can erroneously collapse into a spurious *broken-symmetry* spin-polarized solution (one channel different from the other, with a small but non-zero magnetisation). The four-step protocol first converges an `nspin = 1` calculation — which by construction has spin-up = spin-down — then promotes those orbitals to `nspin = 2`, guaranteeing identical channels.
-
-</details>
 
 ## Problem 4: Calculating the screening parameters
 
