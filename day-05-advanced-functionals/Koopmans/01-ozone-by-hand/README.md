@@ -40,12 +40,14 @@ Check that the calculation completed successfully before continuing.
 
 ### Part A
 
-Open `ozone_dft.in` and inspect the `&SYSTEM` block. The molecule has 18 valence electrons (`nelec = 18`), split evenly between the two spin channels. What does `do_orbdep = .false.` mean? What does this calculation give us?
+Open `ozone_dft.in` and inspect the `&SYSTEM` block. The molecule has 18 valence electrons (`nelec = 18`), split evenly between the two spin channels. What does `do_orbdep = .false.` mean? Why do we want to run such a calculation?
 
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+`do_orbdep = .false.` switches off the orbital-dependent part of the functional, leaving only the standard semi-local DFT (here, PBE) exchange–correlation.
+
+We run a DFT calculation to give us the initial density and variational orbitals from which to start the Koopmans calculation. Doing this within a DFT framework before switching over to solving an ODDFT is more efficient. (This is especially true for the KI functional that we will use here, for which these will also be the _optimal_ density and variational orbitals!)
 
 </details>
 
@@ -82,12 +84,16 @@ fixed_band   = 9
 f_cutoff     = 1e-05
 ```
 
-Together these empty one specific orbital while keeping the rest of the density relaxed. Which orbital is being emptied, and why?
+`f_cutoff` corresponds to the occupation of the variational orbital with index `fixed_band`.
+
+What is this calculation doing?
 
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+The 9th variational orbital is the HOMO. We are setting its occupation to 0.
+
+That means that this is the input for a $N-1$-electron calculation where we have constrained the HOMO of the $N$-electron solution to be empty.
 
 </details>
 
@@ -98,7 +104,7 @@ This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+You should get something close to 12.48 eV
 
 </details>
 
@@ -131,7 +137,7 @@ This input has `do_orbdep = .true.` and `which_orbdep = 'nki'`, whereas `ozone_d
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+Together they switch on the orbital-density-dependent KI correction: `do_orbdep = .true.` enables the orbital-dependent term in the functional, and `which_orbdep = 'nki'` picks the *Koopmans-integral* (KI) form for it.
 
 </details>
 
@@ -142,7 +148,7 @@ Compare the HOMO eigenvalue in `ozone_ki.out` with the one in `ozone_dft.out`. T
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+The KI HOMO is pushed *down* (more negative) compared to the PBE value, so the predicted ionisation potential $-\varepsilon_\text{HOMO}$ goes up. This is the expected qualitative effect of the Koopmans correction: it counteracts the self-interaction error that makes the PBE HOMO too shallow.
 
 </details>
 
@@ -187,7 +193,13 @@ Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\tex
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+First convert the ΔSCF target to eV:
+
+$$E^\text{DFT}[N] - E^\text{DFT}[N{-}1] = (-47.5288) - (-47.0701) \,\text{Ha} = -0.45871\,\text{Ha} \approx -12.48\,\text{eV}.$$
+
+Then plug into the formula from Part A with $\alpha_0 = 0.7$:
+
+$$\alpha_\text{opt} = 0.7 \times \frac{(-12.48) - (-7.90)}{(-11.99) - (-7.90)} = 0.7 \times \frac{-4.58}{-4.08} \approx 0.785.$$
 
 </details>
 
@@ -198,22 +210,6 @@ Verify your value by running the helper script, which applies exactly this formu
 ```bash
 sh get_alpha.sh
 ```
-
-You can store the result in a shell variable and print it with
-
-```bash
-alpha=$(sh get_alpha.sh | tail -1)
-echo "optimal alpha = $alpha"
-```
-
-Open `get_alpha.sh` and check that the arithmetic on its last line matches the formula you derived in Part A. (Watch out for the factor `13.6057 * 2` — what unit conversion is that?)
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
 
 ## Problem 6: The final KI calculation
 
