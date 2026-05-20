@@ -12,18 +12,14 @@ In this exercise you will use the [`koopmans`](https://koopmans-functionals.org)
 
 ## Problem 1: Understanding the input file
 
-Open `ozone.json` and inspect the `workflow` block. You should see the following keys (among others):
+Open [`ozone.json`](ozone.json) and inspect the `workflow` block. You should see the following keys (among others):
 
 ```json
-{
-  "workflow": {
-    "functional": "ki",
-    "method": "dscf",
-    "init_orbitals": "kohn-sham",
-    "alpha_numsteps": 1,
-    "pseudo_library": "SG15/1.2/PBE/SR"
-  }
-}
+"functional": "ki",
+"method": "dscf",
+"init_orbitals": "kohn-sham",
+"alpha_numsteps": 1,
+"pseudo_library": "SG15/1.2/PBE/SR"
 ```
 
 ### Part A
@@ -33,18 +29,24 @@ What does each of `functional`, `method`, and `init_orbitals` control?
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+- `"functional": "ki"` selects the Koopmans integral (KI) functional
+- `"method": "dscf"` selects that we will calculate the screening parameters with the ΔSCF approach
+- `"init_orbitals": "kohn-sham"` means that we will use Kohn-Sham orbitals to initialize the variational orbitals. (And because the KI functional isn't actually orbital-dependent, they will _remain_ the variational orbitals.)
 
 </details>
 
 ### Part B
 
-Inspect the `atoms` block — what is the geometry of the system, and what does the `"periodic": false` flag mean? Why is the simulation cell so much larger than the molecule itself?
+Inspect the `atoms` block — what is the geometry of the system? Why is the simulation cell so much larger than the molecule itself?
 
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+- ozone is a bent molecule, with a bond length ≈ 1.27 Å and a bond angle of 117°
+- the simulation cell is padded with vacuum so the molecule does not interact with its periodic images (plane-wave codes still use a supercell internally, even when the system is treated as non-periodic)
+
+> **Note**
+> The padding is especially important for ΔSCF calculations, where we will be performing calculations in which the molecule acquires a net charge — charged periodic images interact through the long-range Coulomb tail, so the vacuum buffer needs to be even larger than for the neutral system
 
 </details>
 
@@ -69,7 +71,9 @@ Identify the three phases in `ozone.md` and the calculation sub-directories they
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+- **Initialization** → `01-initialization/`
+- **Calculating the screening parameters** → `02-calculate-screening-via-dscf/`
+- **Final KI calculation** → `03-ki_final/`
 
 </details>
 
@@ -93,7 +97,7 @@ Why not just run a single `nspin = 2` PBE calculation? (Hint: ozone is a closed-
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+A direct `nspin = 2` PBE run starting from scratch on a closed-shell system can erroneously collapse into a spurious *broken-symmetry* spin-polarized solution (one channel different from the other, with a small but non-zero magnetisation). The four-step protocol first converges an `nspin = 1` calculation — which by construction has spin-up = spin-down — then promotes those orbitals to `nspin = 2`, guaranteeing identical channels.
 
 </details>
 
@@ -103,11 +107,7 @@ The second phase of the workflow computes one screening parameter $\alpha_i$ per
 
 These calculations live under `01-koopmans-dscf/02-calculate-screening-via-dscf/`, organised into one sub-directory per iteration of the screening loop (`01-iteration-1`, `02-iteration-2`, ...). Each iteration begins with a trial KI calculation (`01-ki`), followed by one sub-directory per orbital (`02-orbital-1`, `03-orbital-2`, ..., `11-orbital-10`).
 
-For each *filled* orbital $i$ (orbitals 1–9 of ozone), the code performs a single constrained $N{-}1$-electron PBE calculation in which orbital $i$ is frozen and emptied while the remaining density is allowed to relax. This yields $E_i(N{-}1)$, which combined with $E(N)$, $\lambda_{ii}^\alpha(1)$, and $\lambda_{ii}^0(1)$ (all of which come from the trial KI calculation) is enough to update $\alpha_i$ from its initial guess of $\alpha_i^0 = 0.6$.
-
-### Part A
-
-Select an orbital. Based on the contents of `01-ki` and `??-orbital-?/01-dft_n-1`, calculate by hand the value of the screening parameter.
+For each *filled* orbital $i$ (orbitals 1–9 of ozone), the code performs a single constrained $N{-}1$-electron PBE calculation in which orbital $i$ is frozen and emptied while the remaining density is allowed to relax. This yields $E_i(N{-}1)$, which combined with $E(N)$, $\lambda_{ii}^\alpha(1)$, and $\lambda_{ii}^0(1)$ (all of which come from the trial KI calculation) is enough to update $\alpha_i$ from its initial guess of $\alpha_i^0 = 0.6$. This is exactly the same linear-extrapolation formula you derived and applied to the HOMO in Exercise 1 — `koopmans` is simply running it for every orbital.
 
 For the *empty* orbital 10, inside `01-iteration-1/11-orbital-10/` you will see three calculations rather than one:
 
@@ -119,32 +119,27 @@ For the *empty* orbital 10, inside `01-iteration-1/11-orbital-10/` you will see 
 
 The third of these is the constrained $N{+}1$-electron PBE calculation analogous to the $N{-}1$ ones for the filled orbitals. The first two contain preparatory calculations that assemble the files required by the third.
 
+### Part A
+
+At the end of the screening-parameters phase, `ozone.md` contains two tables. The first lists $\alpha_i$ for each iteration, and the second lists the residual $\Delta E_i - \lambda_{ii}^\alpha$ — the convergence criterion for the screening procedure. Inspect both. Do the residuals indicate that the screening parameters have converged?
+
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+No — the residuals are well above the default convergence threshold. With `alpha_numsteps = 1` the screening loop has updated each $\alpha_i$ only *once* from the initial guess of 0.6; the residual corresponds to this initial guess, and the updated values have not yet been used as inputs to a calculation that measures this error.
 
 </details>
 
 ### Part B
 
-At the end of the screening-parameters phase, `ozone.md` contains two tables. The first lists $\alpha_i$ for each iteration, and the second lists the residual $\Delta E_i - \lambda_{ii}^\alpha$ — the convergence criterion for the screening procedure. Inspect both. Do the residuals indicate that the screening parameters have converged? `koopmans` also prints a warning that the screening parameters are not necessarily self-consistent, and suggests increasing `alpha_numsteps` — which is exactly what you will do in Part C.
+In `ozone.json`, increase `alpha_numsteps` from `1` to `2` and re-run the workflow. Now the screening loop runs to self-consistency: each row of the $\alpha$ table is the input to the calculation in the next row. What do you notice?
 
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
-
-</details>
-
-### Part C
-
-In `ozone.json`, increase `alpha_numsteps` from `1` to `2` and re-run the workflow. Now the screening loop runs to self-consistency: each row of the $\alpha$ table is the input to the calculation in the next row. Convince yourself that the $\alpha_i$ values from the first iteration (which is what you got in Part B) are *not* self-consistent, but that the converged values now are.
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
+- the code already knows to skip the $N-1$ calculations
+- it still recalculates the empty orbitals (because formally the empty variational orbitals are not independent of the screening parameters)
+- all the residual errors are tiny
 
 </details>
 
@@ -154,7 +149,12 @@ The KI ionisation potential is $-\varepsilon_\text{HOMO}$ from the final KI calc
 
 ### Part A
 
-Open `01-koopmans-dscf/03-ki_final/ki_final.cpo` and locate the HOMO and LUMO eigenvalues. You should see something like
+Open `01-koopmans-dscf/03-ki_final/ki_final.cpo` and locate the HOMO and LUMO eigenvalues. What do you get?
+
+<details>
+<summary><b>Solution</b></summary>
+
+You should find something like
 
 ```text
 HOMO Eigenvalue (eV)
@@ -166,13 +166,6 @@ LUMO Eigenvalue (eV)
    -1.8218
 ```
 
-Report the KI IP and EA of ozone.
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
 </details>
 
 ### Part B
@@ -182,7 +175,17 @@ For comparison, dig out the corresponding PBE values from the final initializati
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+You should find something like
+
+```text
+   HOMO Eigenvalue (eV)
+
+   -7.9550
+
+   LUMO Eigenvalue (eV)
+
+   -6.1684
+```
 
 </details>
 
@@ -193,68 +196,19 @@ Compare your KI and PBE results against the experimental values for ozone:
 - IP ≈ 12.5 eV[^NIST-O3]
 - EA ≈ 2.1 eV
 
-What do you conclude about the accuracy of semi-local DFT and of the KI functional for predicting charged excitations?
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
-
 ### Part D
 
-If you prefer to work in `python`, you can use the `read.ipynb` notebook provided. It loads the `ozone.pkl` file generated by `koopmans` and prints the IP and EA. Open it, run all the cells, and check that you get the same numbers as in Part A.
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
+If you prefer to work in `python`, it is easy to do this: see the `read.ipynb` notebook provided. It loads the `ozone.pkl` file generated by `koopmans` and prints the IP and EA. Open it, run all the cells, and check that you get the same numbers as in Part A.
 
 ## Problem 6: Comparing the full spectrum to experiment
 
 So far you have only looked at the HOMO and LUMO. The KI functional in fact predicts a binding energy for *every* occupied orbital, and these can be compared directly against gas-phase photoemission spectroscopy.
 
-The `plot_spectrum.ipynb` notebook contains experimental binding energies (in eV) for the nine occupied orbitals of ozone, taken from [*Chemical Physics Letters* **375**, 76 (2003)](https://doi.org/10.1016/S0009-2614(03)00818-2). There is one value per occupied orbital, ordered from the most tightly bound orbital to the HOMO; orbitals for which no reliable experimental value is available are marked as `np.nan`.
+The [`plot_spectrum.ipynb`](plot_spectrum.ipynb) notebook contains experimental binding energies (in eV) for the outermost three occupied orbitals of ozone[^Mocellin2003].
 
-### Part A
+Complete the notebook. It loads `ozone.pkl`, extracts both the KI and the PBE orbital eigenvalues, converts them into binding energies, and plots them against the experimental values. Open the notebook, fill in the cells marked `TODO`, and run all the cells to produce the comparison plot. The notebook also includes cells for inspecting `wf.calculations[-1].results`, which will help you work out where the eigenvalues are stored.
 
-Complete the `plot_spectrum.ipynb` notebook. It loads `ozone.pkl`, extracts both the KI and the PBE orbital eigenvalues, converts them into binding energies, and plots them against the experimental values. Open the notebook, fill in the cells marked `TODO`, and run all the cells to produce the comparison plot. The notebook also includes cells for inspecting `wf.calculations[-1].results`, which will help you work out where the eigenvalues are stored.
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
-
-### Part B
-
-How well do the KI binding energies agree with experiment across the *whole* spectrum, not just at the HOMO? How do they compare with the PBE binding energies? Are the deeper (more tightly bound) orbitals described as well as the frontier orbitals?
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
-
-## Problem 7: Take-aways
-
-A Koopmans calculation requires running many constrained DFT calculations — one per orbital (and even more for empty orbitals). What does this imply about how the cost of a ΔSCF Koopmans calculation scales with system size? What does it imply for *periodic* systems, where the variational orbitals are spread throughout the crystal and the supercell needs to be made large enough to host the constrained $N\pm1$ density?
-
-The second exercise, on bulk ZnO, addresses exactly this issue by using a different — much more efficient — method for computing the screening parameters: density-functional perturbation theory (DFPT).
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
-
-## Problem 8: Molecular oxygen [OPTIONAL]
+## Problem 7: Molecular oxygen [OPTIONAL]
 
 Try modifying the input file from ozone to O₂, and see if you can get an ionization potential and electron affinity that compare well to experiment [^NIST-O2].
 
@@ -275,5 +229,23 @@ as well as the list of atoms and their coordinates.
 
 </details>
 
+## Problem 8: Take-aways
+
+A Koopmans calculation requires running many constrained DFT calculations — one per orbital (and even more for empty orbitals). What does this imply about how the cost of a ΔSCF Koopmans calculation scales with system size? What does it imply for *periodic* systems, where the variational orbitals are spread throughout the crystal and the supercell needs to be made large enough to host the constrained $N\pm1$ density?
+
+<details>
+<summary><b>Solution</b></summary>
+
+- **For molecules:** each screening iteration needs ~one constrained DFT calculation per orbital, and the number of orbitals scales with system size. So ΔSCF Koopmans is roughly a factor of $N_\text{orb}$ more expensive than a single DFT calculation — and self-consistency multiplies that by `alpha_numsteps`.
+- **For periodic systems:** worse still. Each constrained $N{\pm}1$ calculation needs a *supercell* big enough that the extra electron (or hole) localises and does not overlap with its periodic images. The supercell volume grows with the localisation length of the variational orbital, so every single calculation in the screening loop is far more expensive than a corresponding primitive-cell calculation — on top of the $N_\text{orb}$ factor.
+- This makes ΔSCF impractical for crystals, and motivates the switch to DFPT in Exercise 3.
+
+</details>
+<br>
+
+The final exercise, on bulk ZnO, addresses exactly this issue by using a different — much more efficient — method for computing the screening parameters: density-functional perturbation theory (DFPT).
+
+
 [^NIST-O3]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).
 [^NIST-O2]: [NIST Chemistry WebBook, SRD 69 — Molecular oxygen, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=20#Ion-Energetics).
+[^Mocellin2003]: A. Mocellin *et al.*, *Ozone valence photoelectron spectroscopy revisited*, [*Chem. Phys. Lett.* **375**, 76 (2003)](https://doi.org/10.1016/S0009-2614(03)00818-2).
