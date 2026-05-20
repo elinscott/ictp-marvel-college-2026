@@ -1,18 +1,10 @@
-# Exercise 1: The screening parameter of ozone "by hand"
+# Exercise 1: A screening parameter of ozone by hand
 
 **Tutors**: Nicola Colonna and Edward Linscott
 
 In this exercise you will perform a Koopmans-compliant KI calculation for the ozone molecule *by hand*, running each of the underlying `kcp.x` calculations yourself instead of letting the `koopmans` package orchestrate them.
 
 The aim is to demystify what a Koopmans calculation actually does: you will compute the optimal screening parameter $\alpha$ for the HOMO of ozone, and then use it to run a final KI calculation. Exercise 2 repeats the same physics with the `koopmans` package driving everything automatically — so keep this exercise in mind as a reference for what is happening "under the hood" there.
-
-By the end you will have:
-
-1. Run a DFT calculation for the neutral $N$-electron system.
-2. Restarted from the DFT orbitals and run a constrained DFT calculation for the $N{-}1$-electron system.
-3. Run a trial KI calculation with a guessed value of $\alpha$.
-4. Used the linearity of the KI eigenvalue in $\alpha$ to extract the *optimal* screening parameter.
-5. Prepared and run the final KI calculation at the optimal $\alpha$.
 
 ## Files provided
 
@@ -41,14 +33,14 @@ If `which` prints nothing, ask a tutor before continuing.
 Run the DFT calculation for the neutral $N$-electron ozone molecule:
 
 ```bash
-mpirun -np 2 kcp.x -in ozone_dft.in > ozone_dft.out
+mpirun kcp.x -in ozone_dft.in > ozone_dft.out
 ```
 
 Check that the calculation completed successfully before continuing.
 
 ### Part A
 
-Open `ozone_dft.in` and inspect the `&SYSTEM` block. The molecule has 18 valence electrons (`nelec = 18`), split evenly between the two spin channels. What does `do_orbdep = .false.` mean, and why is this a plain DFT calculation rather than a KI one?
+Open `ozone_dft.in` and inspect the `&SYSTEM` block. The molecule has 18 valence electrons (`nelec = 18`), split evenly between the two spin channels. What does `do_orbdep = .false.` mean? What does this calculation give us?
 
 <details>
 <summary><b>Solution</b></summary>
@@ -75,7 +67,7 @@ For molecules, the Kohn–Sham orbitals are used directly as the variational orb
 Now run the DFT calculation for the charged system:
 
 ```bash
-mpirun -np 2 kcp.x -in ozone_dft_n-1.in > ozone_dft_n-1.out
+mpirun kcp.x -in ozone_dft_n-1.in > ozone_dft_n-1.out
 ```
 
 Again, make sure the calculation finishes correctly.
@@ -129,7 +121,7 @@ Open `ozone_ki.in` and replace the `<alpha>` placeholder in the `&NKSIC` block w
 Then run the trial KI calculation:
 
 ```bash
-mpirun -np 2 kcp.x -in ozone_ki.in > ozone_ki.out
+mpirun kcp.x -in ozone_ki.in > ozone_ki.out
 ```
 
 ### Part A
@@ -249,7 +241,7 @@ Create a new input file `ozone_ki_opt.in` by copying `ozone_ki.in` and making tw
 Then run the final KI calculation at the optimal screening parameter:
 
 ```bash
-mpirun -np 2 kcp.x -in ozone_ki_opt.in > ozone_ki_opt.out
+mpirun kcp.x -in ozone_ki_opt.in > ozone_ki_opt.out
 ```
 
 ### Part A
@@ -259,24 +251,17 @@ Read the HOMO eigenvalue from `ozone_ki_opt.out`. Does it now satisfy the Koopma
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+It should agree. (Remember to convert to the correct units!)
 
 </details>
 
 ### Part B
 
-Compare the KI ionisation potential against the DFT (PBE) value and the experimental value of ozone, IP ≈ 12.5 eV. What do you conclude about the accuracy of semi-local DFT and of the KI functional for charged excitations?
-
-<details>
-<summary><b>Solution</b></summary>
-
-TODO
-
-</details>
+Compare the KI ionisation potential against the DFT (PBE) value and the experimental value of ozone, IP ≈ 12.5 eV.
 
 ## Problem 7: Take-aways
 
-In this exercise you computed a *single* screening parameter, for the HOMO, by running three explicit `kcp.x` calculations (neutral DFT, constrained $N{-}1$ DFT, trial KI) and applying the screening formula once.
+In this exercise you computed a *single* screening parameter, for the HOMO, by running three explicit `kcp.x` calculations (neutral DFT, constrained $N{-}1$ DFT, trial KI) and applying the same screening parameter to every variational orbital in the system.
 
 A full Koopmans calculation needs one screening parameter for *every* orbital, and the trial-KI/constrained-DFT loop is iterated to self-consistency. How many calculations would that require for ozone's ten orbitals?
 
@@ -290,7 +275,8 @@ A full Koopmans calculation needs one screening parameter for *every* orbital, a
 
 
 > **Note**
-> As we will see in the next exercise, self-consistency with KI is unnecessary, and we can take advantage of symmetries to not have to compute from scratch screening parameters for every orbital.
+> Self-consistency with KI is unnecessary, and we can often take advantage of symmetries to not have to compute from scratch screening parameters for every orbital.
 </details>
+<br>
 
 This is exactly the bookkeeping that the `koopmans` package automates — which is what you will see in Exercise 2.
