@@ -93,7 +93,7 @@ TODO
 
 ### Part B
 
-This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr = 90`). From `ozone_dft.out` and `ozone_dft_n-1.out`, read off the total energies $E^\text{DFT}[N]$ and $E^\text{DFT}[N{-}1]$. Their difference is a $\Delta$SCF estimate of the ionisation potential — what value do you get (in eV)?
+This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr = 90`). From `ozone_dft.out` and `ozone_dft_n-1.out`, read off the total energies $E^\text{DFT}[N]$ and $E^\text{DFT}[N{-}1]$. Their difference is a ΔSCF estimate of the ionisation potential — what value do you get (in eV)?
 
 <details>
 <summary><b>Solution</b></summary>
@@ -152,7 +152,7 @@ The optimal $\alpha$ is the one that enforces the Koopmans condition on the HOMO
 
 $$\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\text{DFT}[N{-}1].$$
 
-(The right-hand side is minus the $\Delta$SCF ionisation potential from Problem 3 — the HOMO eigenvalue should equal the energy *change* on removing an electron, which is negative.)
+(The right-hand side is minus the ΔSCF ionisation potential from Problem 3 — the HOMO eigenvalue should equal the energy *change* on removing an electron, which is negative.)
 
 ### Part A
 
@@ -182,7 +182,7 @@ $$\alpha_\text{opt} = \alpha_0\,\frac{\big(E^\text{DFT}[N] - E^\text{DFT}[N{-}1]
 
 ### Part B
 
-Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$ from `ozone_dft.out` and `ozone_ki.out`, use the $\Delta$SCF target from Problem 3, and work out $\alpha_\text{opt}$ by hand.
+Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$ from `ozone_dft.out` and `ozone_ki.out`, use the ΔSCF target from Problem 3, and work out $\alpha_\text{opt}$ by hand.
 
 <details>
 <summary><b>Solution</b></summary>
@@ -246,7 +246,7 @@ mpirun kcp.x -in ozone_ki_opt.in > ozone_ki_opt.out
 
 ### Part A
 
-Read the HOMO eigenvalue from `ozone_ki_opt.out`. Does it now satisfy the Koopmans condition — that is, does $-\varepsilon^\text{KI}_\text{HOMO}$ agree with the $\Delta$SCF ionisation potential from Problem 3?
+Read the HOMO eigenvalue from `ozone_ki_opt.out`. Does it now satisfy the Koopmans condition — that is, does $-\varepsilon^\text{KI}_\text{HOMO}$ agree with the ΔSCF ionisation potential from Problem 3?
 
 <details>
 <summary><b>Solution</b></summary>
