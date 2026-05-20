@@ -90,7 +90,7 @@ fixed_band   = 9
 f_cutoff     = 1e-05
 ```
 
-Together these empty one specific orbital while keeping the rest of the density relaxed. Which orbital is being emptied, and why is it orbital 9?
+Together these empty one specific orbital while keeping the rest of the density relaxed. Which orbital is being emptied, and why?
 
 <details>
 <summary><b>Solution</b></summary>
@@ -158,13 +158,39 @@ TODO
 
 The optimal $\alpha$ is the one that enforces the Koopmans condition on the HOMO,
 
-$$\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N{-}1] - E^\text{DFT}[N].$$
+$$\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\text{DFT}[N{-}1].$$
 
-The KI eigenvalue is *linear* in $\alpha$, and you already have two points on that line: the DFT calculation (which is the KI result at $\alpha = 0$) and the trial KI calculation (at $\alpha_0 = 0.7$). That is enough to solve for $\alpha_\text{opt}$.
+(The right-hand side is minus the $\Delta$SCF ionisation potential from Problem 3 — the HOMO eigenvalue should equal the energy *change* on removing an electron, which is negative.)
 
 ### Part A
 
-Using only $\varepsilon^\text{DFT}_\text{HOMO}$, $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$, $\alpha_0$, and the $\Delta$SCF target from Problem 3, work out $\alpha_\text{opt}$ by hand.
+Derive the equation for $\alpha_\text{opt}$, using the facts that...
+- $\varepsilon^\text{KI}_\text{HOMO}(\alpha)$ is linear in $\alpha$ (why?)
+- you have at your disposal $\varepsilon^\text{KI}_\text{HOMO}(0) = \varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$
+- for $\alpha_\text{opt}$, the Koopmans condition above is satisfied
+
+<details>
+<summary><b>Solution</b></summary>
+
+The KI correction does not change the ground-state density nor the occupied variational orbitals. Therefore the only  $\alpha$-dependence of the corrected eigenvalue is the explicit prefactor:
+
+$$\varepsilon^\text{KI}_\text{HOMO}(\alpha) = \varepsilon^\text{DFT}_\text{HOMO} + \alpha\Pi[\rho,\rho_\text{HOMO}],$$
+
+with $\Pi[\rho,\rho_\text{HOMO}]$ independent of $\alpha$. At $\alpha = 0$ the correction vanishes and we recover the DFT eigenvalue.
+
+We know the line at $\alpha = 0$ and at $\alpha = \alpha_0$, so
+
+$$\Pi = \frac{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}{\alpha_0}.$$
+
+Setting $\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\text{DFT}[N{-}1]$ and solving for $\alpha_\text{opt}$ we get
+
+$$\alpha_\text{opt} = \alpha_0\,\frac{\big(E^\text{DFT}[N] - E^\text{DFT}[N{-}1]\big) - \varepsilon^\text{DFT}_\text{HOMO}}{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}.$$
+
+</details>
+
+### Part B
+
+Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$ from `ozone_dft.out` and `ozone_ki.out`, use the $\Delta$SCF target from Problem 3, and work out $\alpha_\text{opt}$ by hand.
 
 <details>
 <summary><b>Solution</b></summary>
@@ -173,7 +199,7 @@ TODO
 
 </details>
 
-### Part B
+### Part C
 
 Verify your value by running the helper script, which applies exactly this formula to the output files:
 
@@ -252,11 +278,19 @@ TODO
 
 In this exercise you computed a *single* screening parameter, for the HOMO, by running three explicit `kcp.x` calculations (neutral DFT, constrained $N{-}1$ DFT, trial KI) and applying the screening formula once.
 
-A full Koopmans calculation needs one screening parameter for *every* orbital, and the trial-KI/constrained-DFT loop is iterated to self-consistency. How many calculations would that require for ozone's ten orbitals? This is exactly the bookkeeping that the `koopmans` package automates — which is what you will see in Exercise 2.
+A full Koopmans calculation needs one screening parameter for *every* orbital, and the trial-KI/constrained-DFT loop is iterated to self-consistency. How many calculations would that require for ozone's ten orbitals?
 
 <details>
 <summary><b>Solution</b></summary>
 
-TODO
+- 1 for the DFT initialzation
+- 10 for the self-consistent loop (1 per orbital)
+- 1 for the final KI calculation
+... for a total of 12 calculations if we don't do any self-consistency, 22 for two iterations, _etc._
 
+
+> **Note**
+> As we will see in the next exercise, self-consistency with KI is unnecessary, and we can take advantage of symmetries to not have to compute from scratch screening parameters for every orbital.
 </details>
+
+This is exactly the bookkeeping that the `koopmans` package automates — which is what you will see in Exercise 2.

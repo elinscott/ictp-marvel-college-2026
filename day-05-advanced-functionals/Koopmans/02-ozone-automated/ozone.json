@@ -4,6 +4,7 @@
     "method": "dscf",
     "init_orbitals": "kohn-sham",
     "alpha_numsteps": 1,
+    "spin_polarized": false,
     "pseudo_library": "SG15/1.2/PBE/SR"
   },
   "engine": {
@@ -29,6 +30,7 @@
   "calculator_parameters": {
     "ecutwfc": 65.0,
     "ecutrho": 260.0,
-    "nbnd": 10
+    "nbnd": 10,
+    "tot_magnetization": 0
   }
 }

@@ -190,7 +190,7 @@ TODO
 
 Compare your KI and PBE results against the experimental values for ozone:
 
-- IP ≈ 12.5 eV[^NIST]
+- IP ≈ 12.5 eV[^NIST-O3]
 - EA ≈ 2.1 eV
 
 What do you conclude about the accuracy of semi-local DFT and of the KI functional for predicting charged excitations?
@@ -254,4 +254,26 @@ TODO
 
 </details>
 
-[^NIST]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).
+## Problem 8: Molecular oxygen [OPTIONAL]
+
+Try modifying the input file from ozone to O₂, and see if you can get an ionization potential and electron affinity that compare well to experiment [^NIST-O2].
+
+When writing your input file, remember...
+- O₂ is a linear molecule with a bond length of 1.21 Å
+- it is paramagnetic, so you will need to set `spin_polarized = true` in the `workflow` block
+- change any other relevant parameters
+
+<details>
+<summary><b>Solution</b></summary>
+
+Update...
+- `spin_polarized = True`
+- `tot_magnetization = 2`
+- `nbnd = 8`
+
+as well as the list of atoms and their coordinates.
+
+</details>
+
+[^NIST-O3]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).
+[^NIST-O2]: [NIST Chemistry WebBook, SRD 69 — Molecular oxygen, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=20#Ion-Energetics).
