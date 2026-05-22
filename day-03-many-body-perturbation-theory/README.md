@@ -76,7 +76,7 @@ tutorials.
 
 ### First steps: from DFT to optical properties
 
-1. [Generate a Yambo SAVE folder](#database-generation-tutorial-target)
+1. [Generate a Yambo SAVE folder]((https://yambo-code.github.io/yambo-wiki/tutorials/basic/database_generation.html#database-generation-tutorial-target))
 2. [Initialize the Yambo SAVE folder](#database-initialization-tutorial-target)
 3. [Generate input files using Yambo's command-line interface](#input-file-generation-tutorial-target)
 4. [Optics at the independent particle level](#optics-ipa-tutorial-target)
