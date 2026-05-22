@@ -27,37 +27,37 @@ In order to load them, let's switch to the yambo environment. Just type `workon 
 Let us now create a directory where we will do the tutorial:
 
 ```{code-block} none
-$ mkdir yambo
-$ cd yambo
+mkdir yambo
+cd yambo
 ```
 
 At this point, download the files used in the tutorial via `wget`:
 
 ```{code-block} none
-$ wget https://media.yambo-code.eu/educational/tutorials/files/hBN.tar.gz https://media.yambo-code.eu/educational/tutorials/files/hBN-2D.tar.gz 
+wget https://media.yambo-code.eu/educational/tutorials/files/hBN.tar.gz https://media.yambo-code.eu/educational/tutorials/files/hBN-2D.tar.gz 
 ```
 
 and extract (unzip) them
 
 ```{code-block} none
-$ tar -xvf hBN.tar.gz
-$ tar -xvf hBN-2D.tar.gz
+tar -xvf hBN.tar.gz
+tar -xvf hBN-2D.tar.gz
 ```
 
-````{tip}
+
 For clarity, we suggest you to copy the `hBN` directory twice, as the same system is used in multiple tutorials
 ```{code-block}
-$ cp -r hBN hBN_IPA
-$ cp -r hBN hBN_GW
+cp -r hBN hBN_IPA
+cp -r hBN hBN_GW
 ```
 Run the independent particle tutorial in `hBN_IPA`, and the _GW_ tutorial in `hBN_GW`.
 
-````
+
 
 You are now all set for the tutorial. Just for safety, check that the executable works by typing
 
 ```{code-block} none
-$ yambo -h
+yambo -h
 ```
 
 This should print the help of the Yambo command-line interface.
