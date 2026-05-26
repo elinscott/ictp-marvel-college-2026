@@ -1,0 +1,29 @@
+ &control
+    calculation = 'scf'
+    tprnfor=.true.
+    tstress=.true.
+    twochem=.true.
+    pseudo_dir='../Pseudo/'
+ /
+ &system
+    ibrav=2, celldm(1) =10.18606,
+    nat=2, ntyp=1,
+    ecutwfc=30.0
+    nbnd=8
+    nbnd_cond=4
+    nelec_cond=0.1
+    occupations="smearing"
+    degauss_cond=0.01
+    degauss=0.01
+    smearing='gaussian'
+ /
+ &electrons
+ /
+ATOMIC_SPECIES
+ Si  28.086  Si.pz-vbc.UPF
+ATOMIC_POSITIONS {alat}
+ Si 0.00 0.00 0.00
+ Si 0.25 0.25 0.25
+K_POINTS automatic
+ 8 8 8 1 1 1
+
