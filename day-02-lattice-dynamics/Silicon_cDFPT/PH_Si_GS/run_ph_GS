@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mpirun -n 2 pw.x -npool 2 -in  scf.in  > scf.out
+mpirun -n 2 ph.x -npool 2 -in  ph.in  > ph.out
