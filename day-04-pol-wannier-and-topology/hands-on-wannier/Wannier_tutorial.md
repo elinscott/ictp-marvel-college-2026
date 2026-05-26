@@ -26,6 +26,12 @@ In this session you will learn how to build and use maximally-localized Wannier 
 
 ## Files provided
 
+Before starting the tutorial, make sure that you are in the Day 04 materials directory and that the correct software environment is loaded by running:
+
+```bash
+cdd 04
+```
+
 - `ex1/` — input files for silicon valence-band Wannierization.
 - `ex2/` — files to create from `ex1/` for silicon valence-and-conduction-band Wannierization.
 - `ex3/` — input files for lead Fermi-surface and band-structure interpolation.
@@ -71,15 +77,6 @@ For example:
 ```bash
 pw.x < 01_scf.in > scf.out
 ```
-You can either:
-
-- run it directly from the terminal without activating any environment, or
-- activate the environment first using: `workon qe`
-
-> **Note**
->
-> If you activated the environment, you can deactivate it afterward with: `conda deactivate`
-> 
 
 ### Step 4
 
@@ -174,11 +171,6 @@ Now we have to prepare the input file for Wannier90. Open the file `ex1.win`, wh
 ### Step 12
 
 Finally, we are ready to perform a Wannier90 calculation. This is done in three steps:
-
-> **Note**
->
-> For these steps, you can either activate the environment using `workon wannier` or run it directly from the terminal.
-> 
 
 1.  We first run a preprocessing step using the command `wannier90.x` : 
     
