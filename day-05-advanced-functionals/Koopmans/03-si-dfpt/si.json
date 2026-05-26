@@ -1,6 +1,6 @@
 {
     "workflow": {
-        "task": "singlepoint",
+        "task": "wannierize",
         "functional": "ki",
         "method": "dfpt",
         "mp_correction": false,
@@ -32,9 +32,9 @@
         }
     },
     "kpoints": {
-        "grid": [4, 4, 4],
+        "grid": [2, 2, 2],
         "offset": [0, 0, 0],
-        "path": "LGXKG"
+        "path": "LGXU,KG"
     },
     "calculator_parameters": {
         "ecutwfc": 60.0,
