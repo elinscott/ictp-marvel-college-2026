@@ -419,7 +419,7 @@ Given a Birch-Murnagahn equation of state, we can predict the pressure at arbitr
 > ```
 > Note that the pressure is derived from the stress tensor as $P = 1/3 Tr[\sigma]$.
 > 
-> Meanwhile, here is an example script:for doing so
+> Meanwhile, here is an example script for evaluating the BM equation at a set of volumnes:
 > ```python
 > def birch_murnaghan_pressure(x, v0, b0, db0):
 >     return 3*b0/2*((v0/x)**(7/3) - (v0/x)**(5/3)) * (1 + 3/4*(db0 - 4)*((v0/x)**(2/3) - 1))
