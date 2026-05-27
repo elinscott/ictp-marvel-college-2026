@@ -601,6 +601,454 @@ These are all ground-state properties, for which DFT is generally reliable. For 
 
 ---
 
+## Problem 9: Band structure
+
+The total energy, bulk modulus, and elastic constants all probe the electronic structure through ground-state properties. To understand optical absorption, conductivity, and spectroscopic signatures, we need the **band structure** — the dispersion relation $E_n(\mathbf{k})$ of the Kohn–Sham eigenvalues across the Brillouin zone.
+
+### Part A
+
+Why can we not simply read off the band structure from the SCF calculation carried out in earlier problems?
+
+<details>
+<summary><b>Solution</b></summary>
+
+The SCF calculation evaluates Kohn–Sham eigenvalues only at the **k**-points of the Monkhorst–Pack grid used to converge the charge density. Those points are chosen for their efficiency in sampling Brillouin-zone integrals and do not lie on the high-symmetry paths conventionally used for plotting band structures. Moreover, for an insulator the ground-state charge density does not depend on unoccupied eigenvalues, so the self-consistent potential is already converged after the SCF step; the Kohn–Sham eigenvalues can then be computed at any new set of **k**-points without further self-consistency iterations.
+
+</details>
+
+### Part B
+
+NaCl crystallises in the rocksalt structure with an FCC Bravais lattice. The FCC first Brillouin zone is a **truncated octahedron**. The table below lists the conventional high-symmetry points:
+
+| Label | Cartesian ($2\pi/a$) | Crystal coordinates (`ibrav = 2`) |
+|:---:|:---:|:---:|
+| Γ | $(0,\ 0,\ 0)$ | $(0,\ 0,\ 0)$ |
+| L | $\bigl(\tfrac{1}{2},\ \tfrac{1}{2},\ \tfrac{1}{2}\bigr)$ | $\bigl(\tfrac{1}{2},\ \tfrac{1}{2},\ \tfrac{1}{2}\bigr)$ |
+| X | $(0,\ 1,\ 0)$ | $\bigl(\tfrac{1}{2},\ 0,\ \tfrac{1}{2}\bigr)$ |
+| W | $\bigl(\tfrac{1}{2},\ 1,\ 0\bigr)$ | $\bigl(\tfrac{1}{2},\ \tfrac{1}{4},\ \tfrac{3}{4}\bigr)$ |
+| K | $\bigl(\tfrac{3}{4},\ \tfrac{3}{4},\ 0\bigr)$ | $\bigl(\tfrac{3}{8},\ \tfrac{3}{8},\ \tfrac{3}{4}\bigr)$ |
+
+We will trace the path **L → Γ → X → W → K → Γ**. Convince yourself that the crystal-coordinate columns are correct by expressing each Cartesian vector as a linear combination of the FCC reciprocal primitive vectors for `ibrav = 2`.
+
+<details>
+<summary><b>Solution</b></summary>
+
+For `ibrav = 2` the primitive reciprocal lattice vectors (in Cartesian units of $2\pi/a$) are
+
+$$
+\mathbf{b}_1 = (-1, 1, 1), \qquad \mathbf{b}_2 = (1,-1,1), \qquad \mathbf{b}_3 = (1,1,-1).
+$$
+
+A **k**-point with crystal coordinates $(k_1, k_2, k_3)$ corresponds to the Cartesian vector $k_1\,\mathbf{b}_1 + k_2\,\mathbf{b}_2 + k_3\,\mathbf{b}_3$. Verify X as an example:
+
+$$
+\tfrac{1}{2}(-1,1,1) + 0\cdot(1,-1,1) + \tfrac{1}{2}(1,1,-1) = (0,1,0). \quad\checkmark
+$$
+
+The remaining points follow analogously.
+
+</details>
+
+### Part C
+
+A band-structure calculation requires two steps.
+
+**Step 1 — SCF.** Run `pw.x` with `calculation = 'scf'` using the primitive cell (`ibrav = 2`), the converged `ecutwfc` and **k**-point grid from Problems 1–4, and the equilibrium lattice parameter from Problem 5. If you have kept the `outdir` directory from an earlier primitive-cell SCF with the correct lattice parameter, you may skip this step.
+
+**Step 2 — Bands.** Create a new input file identical to the SCF input except for the following changes:
+
+- Set `calculation = 'bands'` in `&CONTROL`.
+- Set `nbnd` to a value larger than the number of occupied bands in `&SYSTEM`, so that conduction bands are also computed.
+- Replace the `K_POINTS` block with a path through the Brillouin zone using the `crystal_b` option. Each line specifies a high-symmetry point and the number of **k**-points from that point to the next:
+
+```text
+K_POINTS crystal_b
+6
+0.500  0.500  0.500   20    ! L
+0.000  0.000  0.000   30    ! Gamma
+0.500  0.000  0.500   20    ! X
+0.500  0.250  0.750   10    ! W
+0.375  0.375  0.750   30    ! K
+0.000  0.000  0.000    1    ! Gamma (end point)
+```
+
+Keep `outdir` and `prefix` identical to the SCF step so that `pw.x` can find the self-consistent potential.
+
+> **Note**
+>
+> How many valence electrons does each pseudopotential contribute? Check the `z_valence` tag inside the UPF files (in the `pseudopotentials/` directory). The number of occupied bands equals half the total number of valence electrons per primitive cell.
+
+<details>
+<summary><b>Solution</b></summary>
+
+Each UPF file contains:
+
+```text
+Na_pseudo_dojo_v0.5.upf:  z_valence = 9.00   # 2s², 2p⁶, 3s¹ treated as valence
+Cl_pseudo_dojo_v0.5.upf:  z_valence = 7.00   # 3s², 3p⁵ treated as valence
+```
+
+Total valence electrons per primitive cell: $9 + 7 = 16$, so there are **8 occupied bands**. Setting `nbnd = 16` is a good choice — it covers the full valence manifold and the lowest 8 conduction bands.
+
+A minimal `&SYSTEM` block for the bands step:
+
+```text
+&SYSTEM
+   ibrav     = 2
+   celldm(1) = 10.76   ! equilibrium lattice parameter from Problem 5
+   ecutwfc   = 80.0
+   ntyp      = 2
+   nat       = 2
+   nbnd      = 16
+/
+```
+
+</details>
+
+### Part D
+
+Post-process the output with `bands.x`. Create an input file:
+
+```text
+&BANDS
+   outdir  = './tmp/'
+   prefix  = 'NaCl'
+   filband = 'NaCl_bands.dat'
+   lsym    = .true.
+/
+```
+
+and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV relative to the Fermi level — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`.
+
+Plot the band structure. A minimal Python script:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Parse the .gnu file ---
+bands, segment = [], []
+with open('NaCl_bands.dat.gnu') as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            k, e = map(float, line.split())
+            segment.append((k, e))
+        else:
+            if segment:
+                bands.append(np.array(segment))
+                segment = []
+if segment:
+    bands.append(np.array(segment))
+
+# --- Plot ---
+fig, ax = plt.subplots(figsize=(5, 7))
+for band in bands:
+    ax.plot(band[:, 0], band[:, 1], 'b-', lw=0.8)
+
+ax.axhline(0, color='k', lw=0.5, ls='--')  # Fermi level / VBM
+
+# Add vertical lines and labels at high-symmetry points
+# (read their k-coordinates from bands_pp.out)
+# ax.axvline(k_L,  color='k', lw=0.5)
+# ...
+# ax.set_xticks([k_L, k_G, k_X, k_W, k_K, k_G2])
+# ax.set_xticklabels(['L', r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$'])
+
+ax.set_ylabel('Energy (eV)')
+ax.set_ylim(-20, 15)    # adjust to your output
+ax.set_xlim(bands[0][0, 0], bands[0][-1, 0])
+plt.tight_layout()
+plt.savefig('NaCl_bands.png', dpi=150)
+plt.show()
+```
+
+### Part E
+
+Analyse your band structure.
+
+1. How many bands lie below the Fermi level ($E = 0$)? Is this consistent with your expectation from Part C?
+2. Describe the character of the groups of bands from the bottom of the valence manifold upward. (*Hint:* recall which atomic orbitals are included in each pseudopotential.)
+3. Where in the Brillouin zone is the **valence band maximum** (VBM)?
+4. Where is the **conduction band minimum** (CBM)?
+5. Is the band gap **direct** or **indirect**? Estimate its value in eV.
+6. The experimental optical band gap of NaCl is approximately **8.5 eV**<sup>[5](#baldini1970)</sup>. How does your DFT value compare? Is the discrepancy expected?
+
+<details>
+<summary><b>Solution</b></summary>
+
+1. There are **8 bands** below the Fermi level, consistent with 16 valence electrons.
+
+2. From lowest to highest energy:
+   - **1 flat band**: Na 2s character (low-lying, nearly dispersionless).
+   - **3 narrow bands**: Na 2p character (core-like, very flat).
+   - **1 band**: Cl 3s character.
+   - **3 dispersive bands**: Cl 3p character, forming the top of the valence manifold. These are the broadest bands because the Cl 3p orbitals overlap significantly in the rocksalt structure.
+
+3. The **VBM** is at **Γ**, where the three Cl 3p bands are degenerate.
+
+4. The **CBM** is also at **Γ** (predominantly Na 3s / empty-cation-$s$ character).
+
+5. The gap is **direct** at Γ. The DFT-PBE band gap is approximately **5–6 eV**.
+
+6. The DFT value underestimates the experimental gap (~8.5 eV) by roughly 30–40%. This systematic underestimation is a well-known limitation of semi-local exchange-correlation functionals: the Kohn–Sham gap (the difference between the lowest unoccupied and highest occupied Kohn–Sham eigenvalues) is smaller than the true quasiparticle gap because the exchange-correlation potential lacks the derivative discontinuity of the exact functional. Quantitative band-gap predictions require more sophisticated approaches such as hybrid functionals (e.g. HSE06) or many-body perturbation theory in the *GW* approximation.
+
+</details>
+
+### Part F [OPTIONAL]: Density of states
+
+The band structure shows how eigenvalues disperse along particular paths in reciprocal space. The **density of states** (DOS) $g(E)$ instead sums contributions from *all* **k**-points,
+
+$$
+g(E) = \frac{1}{V_\text{BZ}} \sum_n \int_\text{BZ} \delta\!\left(E - E_n(\mathbf{k})\right) d\mathbf{k},
+$$
+
+and is therefore more directly comparable to spectroscopic measurements (e.g. photoemission spectra). To compute the DOS accurately you need a *uniform* sampling of the Brillouin zone — the band-structure **k**-path is not suitable.
+
+> **Warning — back up the bands save directory before proceeding**
+>
+> `pw.x` uses `outdir/prefix.save/` both to **read** data from previous steps and to **write** new results. The NSCF calculation below must use the same `prefix` and `outdir` as the SCF (so that it can read the self-consistent charge density), but it will **overwrite** `data-file-schema.xml` and the wavefunction files with NSCF data, destroying the information needed by `projwfc.x` in Part G.
+>
+> **Before running the NSCF, copy the entire save directory:**
+>
+> ```bash
+> cp -r tmp/NaCl.save tmp/NaCl_bands.save
+> ```
+>
+> To run Part G later, restore it with:
+>
+> ```bash
+> cp -r tmp/NaCl_bands.save/* tmp/NaCl.save/
+> ```
+>
+> The two key files that will be overwritten are:
+>
+> - **`data-file-schema.xml`** — an XML file recording the crystal structure, pseudopotentials, k-point list, and Kohn–Sham eigenvalues. The bands run stores the k-path and band energies here; the NSCF will replace them with the dense uniform-mesh data. `projwfc.x` reads this file to know which k-points and bands to project.
+> - **`wfc*.hdf5`** (or `wfc*.dat`) — one binary file per k-point, each containing the plane-wave expansion coefficients $\{c_{n\mathbf{k}}(\mathbf{G})\}$ of all Kohn–Sham states at that point. `projwfc.x` projects these onto pseudoatomic orbitals to compute the fat-band weights. The NSCF replaces these with wavefunctions at the dense-mesh k-points, which are useless for a k-path projection.
+
+**Step 1 — Dense NSCF calculation.** Run `pw.x` with `calculation = 'nscf'`, using the same `prefix` and `outdir` as your SCF calculation. For an insulator, the **tetrahedron method** avoids artificial broadening and gives the most accurate DOS. Use a dense, uniform **k**-point grid (e.g. 12×12×12):
+
+```text
+&SYSTEM
+   ...
+   occupations = 'tetrahedra'
+/
+...
+K_POINTS automatic
+12 12 12  0 0 0
+```
+
+> **Note**
+>
+> If `occupations = 'tetrahedra'` causes convergence issues, replace it with Gaussian smearing (`occupations = 'smearing'`, `smearing = 'gaussian'`, `degauss = 0.005`). The resulting broadening of 0.005 Ry ≈ 0.07 eV is far smaller than the band gap and will not obscure it.
+
+**Step 2 — Total DOS with `dos.x`.** Create an input file:
+
+```text
+&DOS
+   outdir  = './tmp/'
+   prefix  = 'NaCl'
+   fildos  = 'NaCl_dos.dat'
+   DeltaE  = 0.01
+/
+```
+
+Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energy (eV), DOS (states/eV/cell), and integrated DOS (states/cell). The Fermi energy is printed in `dos.out`; subtract it to set $E_F = 0$.
+
+**Step 3 — Projected DOS with `projwfc.x`.** For a richer picture, compute the DOS projected onto atomic orbitals:
+
+```text
+&PROJWFC
+   outdir   = './tmp/'
+   prefix   = 'NaCl'
+   filpdos  = 'NaCl_pdos'
+   DeltaE   = 0.01
+/
+```
+
+Run `projwfc.x < projwfc.in > projwfc.out`. The program writes one file per angular-momentum channel per atom (e.g. `NaCl_pdos.pdos_atm#1(Na)_wfc#1(s)`, `NaCl_pdos.pdos_atm#2(Cl)_wfc#2(p)`, ...). Each file contains two columns: energy and the local DOS for that channel (sum over $m_l$), followed by individual $m_l$ components.
+
+**Step 4 — Plot.** A minimal Python script that overlays the total DOS and the projected contributions:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import glob
+
+# Read Fermi energy from dos.out
+efermi = None
+with open('dos.out') as f:
+    for line in f:
+        if 'EFermi' in line or 'Fermi' in line:
+            efermi = float(line.split()[-2])  # adjust index if needed
+            break
+
+fig, ax = plt.subplots(figsize=(7, 4))
+
+# Total DOS
+dos = np.loadtxt('NaCl_dos.dat')
+e = dos[:, 0] - efermi
+ax.fill_between(e, dos[:, 1], alpha=0.25, color='k', label='Total')
+ax.plot(e, dos[:, 1], color='k', lw=0.8)
+
+# Projected DOS
+for pdos_file in sorted(glob.glob('NaCl_pdos.pdos_atm*')):
+    atom    = pdos_file.split('(')[1].split(')')[0]   # e.g. 'Na'
+    orbital = pdos_file.split('(')[-1].rstrip(')\n')  # e.g. 's' or 'p'
+    pdos = np.loadtxt(pdos_file)
+    ax.plot(pdos[:, 0] - efermi, pdos[:, 1], lw=0.8, label=f'{atom} {orbital}')
+
+ax.axvline(0, color='k', lw=0.5, ls='--')
+ax.set_xlabel('$E - E_F$ (eV)')
+ax.set_ylabel('DOS (states / eV / cell)')
+ax.set_xlim(-25, 15)
+ax.legend(fontsize=8)
+plt.tight_layout()
+plt.savefig('NaCl_dos.png', dpi=150)
+plt.show()
+```
+
+Identify the groups of peaks in the DOS and relate them to the bands you saw in Part E. Which bands give the sharpest peaks? Why?
+
+<details>
+<summary><b>Solution</b></summary>
+
+The total DOS shows distinct groups of peaks separated by gaps:
+
+- **Lowest group (~−22 to −20 eV)**: a narrow, intense peak from the Na 2s band. This band is nearly dispersionless across the BZ (the 2s orbital is core-like and barely overlaps with neighbours), so many states pile up at almost the same energy — a classic **van Hove singularity**.
+- **Second group (~−18 to −15 eV)**: three overlapping peaks from the Na 2p manifold, likewise quite narrow.
+- **Third group (~−10 to −8 eV)**: a broader peak from the Cl 3s band.
+- **Valence band (~−5 to 0 eV)**: three broader, strongly overlapping peaks from the Cl 3p manifold. The Cl 3p orbitals have larger spatial extent and stronger inter-site hopping than the Na core-like states, leading to greater bandwidth and smoother features.
+- **Gap of ~5–6 eV** above $E_F$, consistent with the band structure in Part E.
+- **Conduction band** starting just above the gap, with initial Na 3s character.
+
+The Na 2s and 2p bands give the sharpest peaks because they are the flattest bands: flat dispersion means $|\nabla_\mathbf{k} E_n(\mathbf{k})|$ is small, which drives the DOS to diverge (van Hove singularity). The PDOS confirms these orbital assignments directly.
+
+</details>
+
+### Part G [OPTIONAL]: Fat bands
+
+A **fat band** plot overlays the orbital character on the band structure: each point $(k, E_n(\mathbf{k}))$ is drawn with a symbol whose area is proportional to the projection weight $\sum_{m_l} |\langle \phi_{\alpha,l,m_l} | \psi_{n\mathbf{k}} \rangle|^2$ onto a chosen atomic orbital $(\alpha, l)$. This makes the orbital character immediately visible without relying on colour-coded energy windows.
+
+Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh from Part F) with `lbands = .true.`:
+
+```text
+&PROJWFC
+   outdir   = './tmp/'
+   prefix   = 'NaCl'
+   filproj  = 'NaCl_fatbands'
+   lbands   = .true.
+/
+```
+
+The program writes `NaCl_fatbands.projwfc_up`. Its layout is:
+
+```text
+nk  nbnd  nwfc                           ← header
+# nwfc lines, one per atomic wavefunction:
+  atom_idx  wfc_idx  element  n  l  m  ind
+# then nk blocks:
+  ik  1  kx  ky  kz                      ← k-point line
+  E_1  p_1  p_2  ...  p_nwfc             ← band 1: energy (eV) + projections
+  E_2  p_1  p_2  ...  p_nwfc             ← band 2
+  ...
+```
+
+The Fermi energy (in eV) is printed in the `projwfc.x` stdout — use it to align energies with your band plot.
+
+Below is a complete example that highlights the **Cl 3p** contribution. Run it, examine which bands light up, and then add the **Na 2s** and **Na 2p** projections to the same axes. (Optionally also add Cl 3s.)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- Parse NaCl_fatbands.projwfc_up ---
+with open('NaCl_fatbands.projwfc_up') as f:
+    nk, nbnd, nwfc = map(int, f.readline().split())
+
+    wfc_info = []
+    for _ in range(nwfc):
+        parts = f.readline().split()
+        wfc_info.append({'atom': int(parts[0]),
+                         'element': parts[2],
+                         'l': int(parts[4]),
+                         'm': int(parts[5])})
+
+    kcoords     = np.zeros((nk, 3))
+    energies    = np.zeros((nk, nbnd))
+    projections = np.zeros((nk, nbnd, nwfc))
+    for ik in range(nk):
+        kcoords[ik] = list(map(float, f.readline().split()[2:5]))
+        for ib in range(nbnd):
+            vals = list(map(float, f.readline().split()))
+            energies[ik, ib]       = vals[0]
+            projections[ik, ib, :] = vals[1:]
+
+# k-path coordinate (cumulative reciprocal-space arc length)
+k_path = np.zeros(nk)
+for ik in range(1, nk):
+    k_path[ik] = k_path[ik - 1] + np.linalg.norm(kcoords[ik] - kcoords[ik - 1])
+
+# Set Fermi level (read from projwfc.x stdout or use VBM of band 8)
+e_fermi = energies[:, 7].max()   # band index 7 = 8th band (last occupied)
+energies -= e_fermi
+
+# --- Print wfc table so you can identify which indices to use ---
+print(f"{'idx':>4}  {'atom':>5}  {'elem':>5}  {'l':>3}  {'m':>3}")
+for i, w in enumerate(wfc_info):
+    print(f"{i:4d}  {w['atom']:5d}  {w['element']:>5}  {w['l']:3d}  {w['m']:3d}")
+
+# --- Select Cl 3p (element 'Cl', l = 1) and sum over m ---
+cl_p_idx    = [i for i, w in enumerate(wfc_info)
+               if w['element'].strip() == 'Cl' and w['l'] == 1]
+cl_p_weight = projections[:, :, cl_p_idx].sum(axis=-1)   # shape: (nk, nbnd)
+
+# --- Plot ---
+fig, ax = plt.subplots(figsize=(5, 7))
+
+# Background: all bands in light grey
+for ib in range(nbnd):
+    ax.plot(k_path, energies[:, ib], color='lightgrey', lw=0.7, zorder=1)
+
+# Fat band: Cl 3p
+scale = 300    # point-area scale factor — adjust to taste
+for ib in range(nbnd):
+    ax.scatter(k_path, energies[:, ib],
+               s=scale * cl_p_weight[:, ib],
+               color='tab:orange', alpha=0.7, linewidths=0, zorder=2,
+               label='Cl $3p$' if ib == 0 else '')
+
+ax.axhline(0, color='k', lw=0.5, ls='--')
+ax.set_ylabel('$E - E_F$ (eV)')
+ax.set_ylim(-25, 10)
+ax.legend()
+
+# Add vertical lines and x-tick labels at high-symmetry points
+# (read k-coordinates from bands_pp.out, as in Part D)
+
+plt.tight_layout()
+plt.savefig('NaCl_fatbands_Cl_p.png', dpi=150)
+plt.show()
+```
+
+Now extend the script to show the **Na 2s** (element `Na`, $l=0$, lowest-energy band group) and **Na 2p** (element `Na`, $l=1$) characters on the same plot, using different colours. What does the resulting fat-band plot tell you about the ionic character of NaCl?
+
+<details>
+<summary><b>Solution</b></summary>
+
+The fat-band plot reveals the orbital origin of each group of bands:
+
+- **Cl 3p** weight is almost entirely confined to the three uppermost valence bands (the broad group just below $E_F$). The weight is large throughout the BZ, confirming that these states have predominantly Cl $p$ character — consistent with the ionic picture where Cl carries a full negative charge.
+- **Na 2s** weight lights up exclusively in the lowest, almost dispersionless band.  Because the Na 2s orbital is very compact, it hybridises weakly with its neighbours and the band is nearly flat.
+- **Na 2p** weight is concentrated in the three narrow bands immediately above the Na 2s band. These bands also disperse very little, reflecting the core-like nature of the Na 2p states.
+- Correspondingly, the Na 3s conduction band carries little weight from any of the occupied atomic wavefunctions: the Na 3s electron has been transferred to Cl and the band is empty.
+
+The sharp separation of atomic-orbital character between bands confirms the strongly ionic nature of NaCl: valence and conduction bands have well-defined Na or Cl parentage with little inter-site hybridisation.
+
+</details>
+
+---
+
 ## References
 
 1. <a id="swanson1953"></a>H. E. Swanson and R. K. Fuyat, *Standard X-ray Diffraction Powder Patterns*, Circular of the Bureau of Standards no. 539, Volume 2, National Bureau of Standards (1953). [archive.org](http://archive.org/details/circularofbureau5392swan)
