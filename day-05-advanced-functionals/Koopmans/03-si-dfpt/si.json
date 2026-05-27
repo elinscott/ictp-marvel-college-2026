@@ -15,7 +15,17 @@
         "from_scratch": true,
         "commands": {
             "pw": {
+                "executable": "/home/linsco_e/code/q-e/build/bin/pw.x",
                 "npool": 2
+            },
+            "pw2wannier90": {
+                "executable": "/home/linsco_e/code/q-e/build/bin/pw2wannier90.x"
+            },
+            "projwfc": {
+                "executable": "/home/linsco_e/code/q-e/build/bin/projwfc.x"
+            },
+            "wannier90": {
+                "executable": "/home/linsco_e/code/q-e/build/bin/wannier90.x"
             }
         }
     },
