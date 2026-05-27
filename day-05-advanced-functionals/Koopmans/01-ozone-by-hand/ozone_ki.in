@@ -42,7 +42,7 @@
    which_compensation = 'tcc'
 /
 &NKSIC
-   nkscalfact       =  0.7
+   nkscalfact       =  <alpha>
    which_orbdep     = 'nki'
    do_innerloop     = .false.
    esic_conv_thr    = 1.8000000000000002e-08

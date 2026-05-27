@@ -166,18 +166,18 @@ You should find something like
 ```text
 HOMO Eigenvalue (eV)
 
-  -12.5199
+  -12.4945
 
 LUMO Eigenvalue (eV)
 
-   -1.8218
+   -1.7184
 ```
 
 </details>
 
 ### Part B
 
-For comparison, dig out the corresponding PBE values from the final initialization calculation (`01-koopmans-dscf/01-initialization/04-dft_init_nspin2/04-dft_init_nspin2.cpo`).
+For comparison, dig out the corresponding PBE values from the final initialization calculation (`01-koopmans-dscf/01-initialization/04-dft_init_nspin2/dft_init_nspin2.cpo`).
 
 <details>
 <summary><b>Solution</b></summary>
@@ -187,11 +187,11 @@ You should find something like
 ```text
    HOMO Eigenvalue (eV)
 
-   -7.9550
+   -7.9229
 
    LUMO Eigenvalue (eV)
 
-   -6.1684
+   -6.1058
 ```
 
 </details>
