@@ -104,7 +104,7 @@ This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr
 <details>
 <summary><b>Solution</b></summary>
 
-You should get something close to 12.48 eV
+You should get something close to 12.49 eV
 
 </details>
 
@@ -195,11 +195,11 @@ Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\tex
 
 First convert the ΔSCF target to eV:
 
-$$E^\text{DFT}[N] - E^\text{DFT}[N{-}1] = (-47.5288) - (-47.0701) \,\text{Ha} = -0.45871\,\text{Ha} \approx -12.48\,\text{eV}.$$
+$$E^\text{DFT}[N] - E^\text{DFT}[N{-}1] = (-47.5296) - (-47.0705) \,\text{Ha} = -.4591\,\text{Ha} \approx -12.49\,\text{eV}.$$
 
 Then plug into the formula from Part A with $\alpha_0 = 0.7$:
 
-$$\alpha_\text{opt} = 0.7 \times \frac{(-12.48) - (-7.90)}{(-11.99) - (-7.90)} = 0.7 \times \frac{-4.58}{-4.08} \approx 0.785.$$
+$$\alpha_\text{opt} = 0.7 \times \frac{(-12.49) - (-7.92)}{(-12.00) - (-7.92)} = 0.7 \times \frac{-4.57}{-4.08} \approx 0.784.$$
 
 </details>
 
