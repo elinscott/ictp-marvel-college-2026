@@ -104,7 +104,7 @@ This calculation restarts from the neutral run (`restart_mode = 'restart'`, `ndr
 <details>
 <summary><b>Solution</b></summary>
 
-You should get something close to 12.48 eV
+You should get something close to 12.49 eV
 
 </details>
 
@@ -164,7 +164,7 @@ $$\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\te
 
 Derive the equation for $\alpha_\text{opt}$, using the facts that...
 - $\varepsilon^\text{KI}_\text{HOMO}(\alpha)$ is linear in $\alpha$ (why?)
-- you have at your disposal $\varepsilon^\text{KI}_\text{HOMO}(0) = \varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$
+- you have at your disposal $`\varepsilon^\text{KI}_\text{HOMO}(0) = \varepsilon^\text{DFT}_\text{HOMO}`$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$
 - for $\alpha_\text{opt}$, the Koopmans condition above is satisfied
 
 <details>
@@ -172,34 +172,34 @@ Derive the equation for $\alpha_\text{opt}$, using the facts that...
 
 The KI correction does not change the ground-state density nor the occupied variational orbitals. Therefore the only  $\alpha$-dependence of the corrected eigenvalue is the explicit prefactor:
 
-$$\varepsilon^\text{KI}_\text{HOMO}(\alpha) = \varepsilon^\text{DFT}_\text{HOMO} + \alpha\Pi[\rho,\rho_\text{HOMO}],$$
+$`\varepsilon^\text{KI}_\text{HOMO}(\alpha)=\varepsilon^\text{DFT}_\text{HOMO} + \alpha\lambda_{\text{HOMO}}[\rho,\rho_\text{HOMO}],`$
 
-with $\Pi[\rho,\rho_\text{HOMO}]$ independent of $\alpha$. At $\alpha = 0$ the correction vanishes and we recover the DFT eigenvalue.
+with $\lambda_{\text{HOMO}}[\rho,\rho_\text{HOMO}]$ independent of $\alpha$. At $\alpha = 0$ the correction vanishes and we recover the DFT eigenvalue.
 
 We know the line at $\alpha = 0$ and at $\alpha = \alpha_0$, so
 
-$$\Pi = \frac{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}{\alpha_0}.$$
+$`\lambda_{\text{HOMO}} = \frac{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}{\alpha_0}.`$
 
-Setting $\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\text{DFT}[N{-}1]$ and solving for $\alpha_\text{opt}$ we get
+Setting $`\varepsilon^\text{KI}_\text{HOMO}(\alpha_\text{opt}) = E^\text{DFT}[N] - E^\text{DFT}[N{-}1]`$ and solving for $\alpha_\text{opt}$ we get
 
-$$\alpha_\text{opt} = \alpha_0\,\frac{\big(E^\text{DFT}[N] - E^\text{DFT}[N{-}1]\big) - \varepsilon^\text{DFT}_\text{HOMO}}{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}.$$
+$`\alpha_\text{opt} = \alpha_0\,\frac{\big(E^\text{DFT}[N] - E^\text{DFT}[N{-}1]\big) - \varepsilon^\text{DFT}_\text{HOMO}}{\varepsilon^\text{KI}_\text{HOMO}(\alpha_0) - \varepsilon^\text{DFT}_\text{HOMO}}.`$
 
 </details>
 
 ### Part B
 
-Now plug numbers into the equation you derived in Part A. Read $\varepsilon^\text{DFT}_\text{HOMO}$ and $\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)$ from `ozone_dft.out` and `ozone_ki.out`, use the ΔSCF target from Problem 3, and work out $\alpha_\text{opt}$ by hand.
+Now plug numbers into the equation you derived in Part A. Read $`\varepsilon^\text{DFT}_\text{HOMO}`$ and $`\varepsilon^\text{KI}_\text{HOMO}(\alpha_0)`$ from `ozone_dft.out` and `ozone_ki.out`, use the ΔSCF target from Problem 3, and work out $\alpha_\text{opt}$ by hand.
 
 <details>
 <summary><b>Solution</b></summary>
 
 First convert the ΔSCF target to eV:
 
-$$E^\text{DFT}[N] - E^\text{DFT}[N{-}1] = (-47.5288) - (-47.0701) \,\text{Ha} = -0.45871\,\text{Ha} \approx -12.48\,\text{eV}.$$
+$$E^\text{DFT}[N] - E^\text{DFT}[N{-}1] = (-47.5296) - (-47.0705) \,\text{Ha} = -.4591\,\text{Ha} \approx -12.49\,\text{eV}.$$
 
 Then plug into the formula from Part A with $\alpha_0 = 0.7$:
 
-$$\alpha_\text{opt} = 0.7 \times \frac{(-12.48) - (-7.90)}{(-11.99) - (-7.90)} = 0.7 \times \frac{-4.58}{-4.08} \approx 0.785.$$
+$$\alpha_\text{opt} = 0.7 \times \frac{(-12.49) - (-7.92)}{(-12.00) - (-7.92)} = 0.7 \times \frac{-4.57}{-4.08} \approx 0.784.$$
 
 </details>
 

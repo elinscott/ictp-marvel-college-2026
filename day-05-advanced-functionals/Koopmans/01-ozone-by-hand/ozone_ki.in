@@ -36,12 +36,13 @@
 /
 &IONS
    ion_dynamics     = 'none'
+   ion_radius(1)    = 1.0
 /
 &EE
    which_compensation = 'tcc'
 /
 &NKSIC
-   nkscalfact       = <alpha>
+   nkscalfact       =  <alpha>
    which_orbdep     = 'nki'
    do_innerloop     = .false.
    esic_conv_thr    = 1.8000000000000002e-08
