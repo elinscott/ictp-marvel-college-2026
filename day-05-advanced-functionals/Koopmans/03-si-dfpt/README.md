@@ -7,9 +7,6 @@ In this exercise you will compute the KI band structure of bulk silicon. There a
 1. **The variational orbitals are now maximally-localised Wannier functions (MLWFs)** instead of Kohn–Sham orbitals.
 2. **The screening parameters are computed via DFPT** instead of via constrained ΔSCF calculations in a supercell.
 
-> [!NOTE]
-> Unlike a ΔSCF calculation, the DFPT screening for silicon is cheap enough to run live during this session: it is performed by linear response in the primitive cell, here on a coarse `dfpt_coarse_grid` of `[2, 2, 2]`. The screening parameters are therefore computed on the fly rather than supplied in advance.
-
 ## Files provided
 
 - `si.json` — the input file for the calculation
