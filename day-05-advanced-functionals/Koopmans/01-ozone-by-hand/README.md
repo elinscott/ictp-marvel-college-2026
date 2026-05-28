@@ -142,7 +142,7 @@ Together they switch on the orbital-density-dependent KI correction: `do_orbdep 
 
 ### Part B
 
-Compare the HOMO eigenvalue in `ozone_ki.out` with the one in `ozone_dft.out`. The KI eigenvalue at $\alpha = 0$ is, by construction, equal to the DFT eigenvalue. How has the trial correction (at $\alpha = 0.7$) shifted the HOMO?
+Compare the HOMO eigenvalue in `ozone_ki.out` with the one in `ozone_dft.out`. The KI eigenvalue at $\alpha = 0$ is, by construction, equal to the DFT eigenvalue. How has the trial correction (at $\alpha_0 = 0.7$) shifted the HOMO?
 
 <details>
 <summary><b>Solution</b></summary>

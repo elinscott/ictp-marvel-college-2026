@@ -41,12 +41,11 @@ Inspect the `atoms` block — what is the geometry of the system? Why is the sim
 
 <details>
 <summary><b>Solution</b></summary>
-
 - ozone is a bent molecule, with a bond length ≈ 1.27 Å and a bond angle of 117°
 - the simulation cell is padded with vacuum so the molecule does not interact with its periodic images (plane-wave codes still use a supercell internally, even when the system is treated as non-periodic)
 
 > [!NOTE]
-> The padding is especially important for ΔSCF calculations, where we will be performing calculations in which the molecule acquires a net charge — charged periodic images interact through the long-range Coulomb tail, so the vacuum buffer needs to be even larger than for the neutral system
+> The padding is especially important for ΔSCF calculations, where we will be performing calculations in which the molecule acquires a net charge — charged periodic images interact through the long-range Coulomb tail, so the vacuum buffer needs to be even larger than for the neutral system. In addition to using a larger vacuum buffer, these effects are mitigated through reciprocal-space counter-charge correction schemes, which compensate for the artificial electrostatic interaction between periodic images[^LiDabo2011].
 
 </details>
 
@@ -138,7 +137,7 @@ No — the residuals are well above the default convergence threshold. With `alp
 
 ### Part B
 
-In `ozone.json`, increase `alpha_numsteps` from `1` to `2` and re-run the workflow. Now the screening loop runs to self-consistency: each row of the $\alpha$ table is the input to the calculation in the next row. What do you notice?
+In `ozone.json`, increase `alpha_numsteps` from `1` to `2` and change `from_scratch` to `false` and re-run the workflow. (`from_scratch = False` will mean that the workflow will pick up from where the `alpha_numsteps = 1` workflow left off.) Now the screening loop runs to self-consistency: each row of the $\alpha$ table is the input to the calculation in the next row. What do you notice?
 
 <details>
 <summary><b>Solution</b></summary>
@@ -255,3 +254,4 @@ The final exercise, on bulk silicon, addresses exactly this issue by using a dif
 [^NIST-O3]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).
 [^NIST-O2]: [NIST Chemistry WebBook, SRD 69 — Molecular oxygen, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=20#Ion-Energetics).
 [^Mocellin2003]: A. Mocellin *et al.*, *Ozone valence photoelectron spectroscopy revisited*, [*Chem. Phys. Lett.* **375**, 76 (2003)](https://doi.org/10.1016/S0009-2614(03)00818-2).
+[^LiDabo2011]: Y. Li and I. Dabo, *Electronic levels and electrical response of periodic molecular structures from plane-wave orbital-dependent calculations*, [*Phys. Rev. B* **84**, 155127 (2011)](https://doi.org/10.1103/PhysRevB.84.155127).
