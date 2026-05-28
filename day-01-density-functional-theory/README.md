@@ -759,7 +759,11 @@ A minimal `&SYSTEM` block for the bands step:
 
 ### Part D
 
-Post-process the output with `bands.x`. Create an input file:
+Post-process the output with `bands.x`.
+
+#### Step 1 — Run `bands.x`
+
+Create an input file:
 
 ```text
 &BANDS
@@ -772,7 +776,9 @@ Post-process the output with `bands.x`. Create an input file:
 
 and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV (absolute, **not** shifted to the Fermi level) — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`. To set $E_F = 0$, use the highest occupied level reported by `pw.x` in the SCF output (look for the line `highest occupied, lowest unoccupied level (eV)` and take the first value).
 
-Plot the band structure. A minimal Python script:
+#### Step 2 — Plot the band structure
+
+A minimal Python script:
 
 ```python
 import numpy as np
