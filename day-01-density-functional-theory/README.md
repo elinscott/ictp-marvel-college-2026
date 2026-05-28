@@ -18,6 +18,7 @@ This session continues from the [preliminary exercise](../before/preliminary-exe
 - `NaCl_conventional.scf.in` — input file for the NaCl conventional 8-atom cell (use for Problem 7)
 - `pseudopotentials/` — pseudopotentials for Na and Cl
 - `script.sh` — example bash script for running a sweep over a parameter
+- `python_utils.py` — helper functions used by the plotting scripts in Problem 9
 
 ---
 
@@ -730,6 +731,9 @@ Keep `outdir` and `prefix` identical to the SCF step so that `pw.x` can find the
 >
 > How many valence electrons does each pseudopotential contribute? Check the `z_valence` tag inside the UPF files (in the `pseudopotentials/` directory). The number of occupied bands equals half the total number of valence electrons per primitive cell.
 
+> [!WARNING]
+> This calculation might take a little longer than those you have run previously. Don't worry if `Quantum ESPRESSO` appears to stop for a minute or two!
+
 <details>
 <summary><b>Solution</b></summary>
 
@@ -747,7 +751,7 @@ A minimal `&SYSTEM` block for the bands step:
 ```text
 &SYSTEM
    ibrav     = 2
-   celldm(1) = 10.76   ! equilibrium lattice parameter from Problem 5
+   celldm(1) = 10.7702
    ecutwfc   = 80.0
    ntyp      = 2
    nat       = 2
@@ -781,50 +785,19 @@ and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files
 A minimal Python script:
 
 ```python
-import numpy as np
 import matplotlib.pyplot as plt
+from python_utils import read_efermi, read_bands_gnu, get_high_symm_points
 
-# --- Read highest occupied level from SCF output ---
-# pw.x prints: "highest occupied, lowest unoccupied level (eV):  X.XXXX  X.XXXX"
-efermi = None
-with open('scf.out') as f:   # replace with your SCF output file name
-    for line in f:
-        if 'highest occupied' in line:
-            efermi = float(line.split(':')[1].split()[0])
-            break
+efermi = read_efermi('scf.out')   # replace with your SCF output filename
+bands = read_bands_gnu('NaCl_bands.dat.gnu')
 
-# --- Parse the .gnu file ---
-bands, segment = [], []
-with open('NaCl_bands.dat.gnu') as f:
-    for line in f:
-        line = line.strip()
-        if line:
-            k, e = map(float, line.split())
-            segment.append((k, e - efermi))
-        else:
-            if segment:
-                bands.append(np.array(segment))
-                segment = []
-if segment:
-    bands.append(np.array(segment))
-
-# --- Plot ---
 fig, ax = plt.subplots(figsize=(5, 7))
 for band in bands:
-    ax.plot(band[:, 0], band[:, 1], 'b-', lw=0.8)
+    ax.plot(band[:, 0], band[:, 1] - efermi, 'b-', lw=0.8)
 
 ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
-# High-symmetry points: fill in k-coordinates from bands_pp.out
-hs_points = [
-    (k_L,  'L'),
-    (k_G,  r'$\Gamma$'),
-    (k_X,  'X'),
-    (k_W,  'W'),
-    (k_K,  'K'),
-    (k_G2, r'$\Gamma$'),
-]
-ks, lbls = zip(*hs_points)
+ks, lbls = get_high_symm_points('bands_pp.out')
 for k in ks:
     ax.axvline(k, color='k', lw=0.5)
 ax.set_xticks(ks)
@@ -1079,37 +1052,13 @@ Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from python_utils import read_efermi, read_bands_gnu, get_high_symm_points, load_kdos
 
-# --- Fermi level from SCF output ---
-efermi = None
-with open('scf.out') as f:        # replace with your SCF output filename
-    for line in f:
-        if 'highest occupied' in line:
-            efermi = float(line.split(':')[1].split()[0])
-            break
+efermi = read_efermi('scf.out')        # replace with your SCF output filename
 
-# --- k-path coordinates from bands.dat.gnu (Part D) ---
-k_path = []
-with open('NaCl_bands.dat.gnu') as f:
-    for line in f:
-        line = line.strip()
-        if line:
-            k_path.append(float(line.split()[0]))
-        else:
-            break                  # only need the first band
-k_path = np.array(k_path)         # shape (nk,)
+# k-path coordinates from bands.dat.gnu (first band only)
+k_path = read_bands_gnu('NaCl_bands.dat.gnu')[0][:, 0]
 nk = len(k_path)
-
-# --- Load k-resolved ldos from a pdos_atm file ---
-def load_kdos(filename, nk):
-    """Return (Egrid, intensity) where intensity[ik, iE] = ldos."""
-    d = np.genfromtxt(filename, comments='#')
-    nE = int(np.sum(d[:, 0] == 1))
-    Egrid = d[d[:, 0] == 1, 1]
-    intensity = np.zeros((nk, nE))
-    for ik in range(1, nk + 1):
-        intensity[ik - 1] = d[d[:, 0] == ik, 2]   # col 2 = ldos (sum over m)
-    return Egrid, intensity
 
 # --- Cl 3p ---
 Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)', nk)
@@ -1134,16 +1083,7 @@ ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(-8, 5)
 ax.set_xlim(k_path[0], k_path[-1])
 
-# High-symmetry point markers (fill in from bands_pp.out, as in Part D)
-hs_points = [
-    (k_L,  'L'),
-    (k_G,  r'$\Gamma$'),
-    (k_X,  'X'),
-    (k_W,  'W'),
-    (k_K,  'K'),
-    (k_G2, r'$\Gamma$'),
-]
-ks, lbls = zip(*hs_points)
+ks, lbls = get_high_symm_points('bands_pp.out')
 for k in ks:
     ax.axvline(k, color='k', lw=0.5)
 ax.set_xticks(ks)
