@@ -1,0 +1,45 @@
+# 1) Initialization
+units lj
+dimension 3
+atom_style atomic
+boundary p p p
+
+# 2) System definition
+variable rho   equal ???  # density
+lattice fcc ${rho}
+region simbox block 0 6 0 6 0 6
+create_box 1 simbox
+create_atoms 1 box
+
+# 3) Settings
+variable T0    equal ???  # initial temperature
+mass 1 1.0
+pair_style lj/cut 4.0
+pair_coeff 1 1 1.0 1.0
+velocity all create ${T0} 12345 mom yes rot yes dist gaussian
+
+# 4) Monitoring
+variable target_phase string ???   # suffix in the data
+
+thermo 100
+thermo_style custom step temp etotal pe ke
+
+dump wrap   all custom 10 wrap_pos_${target_phase}.lammpstrj   id x y z
+dump_modify wrap   sort id
+dump unwrap all custom 10 unwrap_pos_${target_phase}.lammpstrj id xu yu zu
+dump_modify unwrap sort id
+dump vels   all custom 10 vels_${target_phase}.lammpstrj       id vx vy vz
+dump_modify vels   sort id
+
+variable mytemp   equal temp
+variable myetot   equal etotal
+variable mype     equal pe
+variable myke     equal ke
+fix thermofile all ave/time 10 1 10 &
+    v_mytemp v_myetot v_mype v_myke &
+    file thermo_${target_phase}.dat
+
+# 5) Run
+fix mynve all nve
+timestep 0.005
+run 20000               # number of steps

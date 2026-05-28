@@ -4,11 +4,11 @@
 
 This session continues from the [preliminary exercise](../before/preliminary-exercise/), where you ran your first `Quantum ESPRESSO` calculation on bulk NaCl. Here you will run convergence tests for the cutoff energy and _**k**_-point sampling, and then use the converged parameters to compute the equilibrium lattice parameter, bulk modulus, and elastic constants.
 
-> **Note**
+> [!NOTE]
 >
 > In order to solve the convergence problems, you will have to run dozens of calculations. You will find this lab a lot easier if you (a) systematically organise your calculations in separate directories and (b) use a script to automatically run multiple calculations at once. We have provided an example `bash` script (`script.sh`) that you can use for this purpose. It would also be wise to write scripts to extract results from the output files and plot them. Wherever possible, avoid doing things by hand!
 
-> **Note**
+> [!NOTE]
 >
 > While the calculations in the convergence problems should not take too much time, do not run more calculations than is necessary to obtain reliable results. This is good practice for real research, where calculations take much longer and computational resources are limited.
 
@@ -57,7 +57,7 @@ The table below shows the total energy of bulk NaCl as a function of the kinetic
 
 Plot the energy *vs.* cutoff energy data, and determine when the total energy is converged to within 5 meV/atom.
 
-> **Note**
+> [!NOTE]
 >
 > `pw.x` reports the energy in units of Rydbergs per simulation cell.
 
@@ -115,7 +115,7 @@ For this structure, the forces on all atoms vanish by symmetry. Without displaci
 
 Displace a Na (or Cl) atom by +0.05 in the *c* direction (fractional coordinates). Keeping the other parameters fixed, calculate the forces on a Na (or Cl) atom as a function of the kinetic energy cutoff. Converge the $z$-component of the force on one of the atoms to within 10 meV/Å. Provisionally, use the _**k**_-point mesh fixed to 4×4×4 including the Γ point.
 
-> **Note**
+> [!NOTE]
 >
 > Forces are reported in the output file (in Ry/Bohr) after the total energies, *e.g.*
 >
@@ -156,7 +156,7 @@ Use a converged value for the cutoff energy based on your results for Problems 1
 
 Look at the _**k**_ points listed in an output file (look for `number of k points`). Is the number what you expect, based on the _**k**_-point grid specified in the corresponding input file? Why or why not?
 
-> **Note**
+> [!NOTE]
 >
 > The number of irreducible _**k**_ points is reported in the `pw.x` output file.
 
@@ -277,11 +277,11 @@ Note: don't be conservative and pick larger values. This defeats the purpose of 
 
 Determine the equilibrium lattice parameter of NaCl by calculating its energy-versus-volume profile.
 
-> **Note**
+> [!NOTE]
 >
 > For this problem, you can adjust the `bash` script so that it modifies the lattice constant `celldm(1)`.
 
-> **Note**
+> [!NOTE]
 >
 > Later, in Problem 8, you will be asked to compare your computed lattice parameter against experimental values, but it is already a good idea to look up the experimental value so that you can make sure your calculations are not completely off.
 
@@ -334,7 +334,7 @@ If the window is too wide, higher-order (anharmonic) terms become significant, t
 
 Calculate the bulk modulus *B* of NaCl using the second-order equation you derived above. Depending on your answer to Part B, you can re-use some or all of your data from Problem 5.
 
-> **Note**
+> [!NOTE]
 >
 > This is the simplest possible approach to computing the bulk modulus: approximate the energy-versus-volume relationship to second order. Remember that `pw.x` calculates energies per unit cell.
 
@@ -351,7 +351,7 @@ Applying the second-order formula to the $E(V)$ data gives a bulk modulus of $B 
 
 Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan isothermal equation of state.
 
-> **Note**
+> [!NOTE]
 >
 > A more complicated approach than the second-order one is to use an *equation of state* — that is, a function that describes the relationship of state variables. There are several competing proposals for the precise shape of this function. Here we use the *third-order Birch–Murnaghan isothermal equation of state*:
 >
@@ -365,21 +365,23 @@ Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan i
 > 
 > ```python
 >
+> import numpy as np
 > from scipy.optimize import curve_fit
 >
 > def birch_murnaghan(x, e0, v0, b0, db0):
 >     x23 = (v0/x)**(2/3)
 >     return e0 + 9*v0*b0/16*(db0*(x23 - 1)**3 + (x23 - 1)**2 * (6 - 4 * x23))
 >
-> volumes = [...]
-> energies = [...]
 >
-> curve_fit(birch_murnaghan, volumes, energies)
-> ```
+> volumes = np.array([...])
+> energies = np.array([...])
+>
+> # fit E(V) to obtain the equation-of-state parameters
+> (e0, v0, b0, db0), _ = curve_fit(birch_murnaghan, volumes, energies)
+> print(f'B = {b0}')
+>
 > 
 > or use the interactive `ev.x` program provided with `Quantum ESPRESSO`. This program works interactively: it expects that you specify units (`Ang` or `ANG` or `ang` indicates Ångströms, while any other input will default to atomic units), the type of Bravais lattice that you used, the type of equation of state that you want to use for the fit (in our case, `birch1`), and an input file. In the input file for `ev.x` you have to provide two columns for the case of an FCC lattice: the first one contains the lattice parameter and the second one the total energy obtained.
-
->
 
 <details>
 <summary><b>Solution</b></summary>
@@ -400,6 +402,31 @@ Compare your computed bulk modulus obtained with the two methods described above
 The Birch–Murnaghan value is expected to be more reliable. The parabolic fit is thrown off by anharmonicity, whereas the Birch–Murnaghan equation of state accounts for it — this matters especially if the parabolic fit is poor.
 
 </details>
+
+### Part F [OPTIONAL]
+Given a Birch-Murnagahn equation of state, we can predict the pressure at arbitrary volumes. How does its prediction of pressure compare to the value computed _ab initio_ by `Quantum ESPRESSO`?
+
+> [!NOTE]
+> 
+> The pressure is printed out by Quantum ESPRESSO as follows
+> ```text
+>    Computing stress (Cartesian axis) and pressure
+>
+>         total   stress  (Ry/bohr**3)                   (kbar)     P=        9.08
+>  0.00006176   0.00000000  -0.00000000            9.08        0.00       -0.00
+> -0.00000000   0.00006176   0.00000000           -0.00        9.08        0.00
+> -0.00000000   0.00000000   0.00006176           -0.00        0.00        9.08
+> ```
+> Note that the pressure is derived from the stress tensor as $P = 1/3 Tr[\sigma]$.
+> 
+> Meanwhile, here is an example script for evaluating the BM equation at a set of volumnes:
+> ```python
+> def birch_murnaghan_pressure(x, v0, b0, db0):
+>     return 3*b0/2*((v0/x)**(7/3) - (v0/x)**(5/3)) * (1 + 3/4*(db0 - 4)*((v0/x)**(2/3) - 1))
+> 
+> pressures = birch_murnaghan_pressure(volumes, v0, b0, db0)
+> ```
+
 
 ## Problem 7: Elastic constants
 
@@ -427,7 +454,7 @@ $$ E \approx E_0 - P(V_0)\, \Delta V + \tfrac{1}{2} V_0 \sum_{i=1}^{6} \sum_{j=1
 
 In this lab we will choose volume-conserving strains ($\Delta V = 0$), so the linear-in-strain term vanishes and the energy isolates particular $C_{ij}$ depending on the strain pattern.
 
-> **Note**
+> [!NOTE]
 >
 > The calculations for this problem will be more expensive than those you have run thus far, but should still be manageable on a laptop.
 
@@ -479,15 +506,15 @@ celldm1=$(echo "$a * (1 + $x)" | bc -l)
 
 and the remaining `celldm` values follow analogously.
 
-> **Note**
+> [!NOTE]
 >
 > Make sure that you use the optimized cell parameter you determined in Problems 5 and 6! This is important because the equations we use to calculate the elastic constants assume that we are applying strain to the equilibrium structure. If you use the incorrect cell parameter, there will be a mismatch between the energies you calculate and the equations you use to extract the elastic constants.
 
-> **Note**
+> [!NOTE]
 >
 > A list of all possible values of `ibrav` can be found in the [`Quantum ESPRESSO` documentation](https://www.quantum-espresso.org/Doc/INPUT_PW.html#idm199). You will need to work out the appropriate atomic positions for the 8-atom conventional cell yourself. When entering the `celldm` ratios, enter the numerical result of the division, not the expression itself.
 
-> **Note**
+> [!NOTE]
 >
 > Upon the application of strain, it may happen that not all atomic positions in the cell are fixed by symmetry, as there is more than one basis element (*i.e.* a Na and a Cl atom). When we apply the strain, one of these atoms could move to a different relative position and lower the total energy of the cell. This means that when we calculate the elastic constant we should allow the cell to relax the atoms to their equilibrium positions instead of fixing them. This is done by changing the `calculation` variable in the `control` namelist from `scf` to `relax`:
 >
