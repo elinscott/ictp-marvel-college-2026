@@ -854,7 +854,7 @@ Analyse your band structure.
 3. Where in the Brillouin zone is the **valence band maximum** (VBM)?
 4. Where is the **conduction band minimum** (CBM)?
 5. Is the band gap **direct** or **indirect**? Estimate its value in eV.
-6. The experimental optical band gap of NaCl is approximately **8.5 eV**<sup>[5](#baldini1970)</sup>. How does your DFT value compare? Is the discrepancy expected?
+6. The experimental optical band gap of NaCl is approximately 8.5 eV<sup>[5](#baldini1970)</sup>. How does your DFT value compare? Is the discrepancy expected?
 
 <details>
 <summary><b>Solution</b></summary>
@@ -873,7 +873,7 @@ Analyse your band structure.
 
 5. The gap is **direct** at Γ. The DFT-PBE band gap is approximately **5–6 eV**.
 
-6. The DFT value underestimates the experimental gap (~8.5 eV) by roughly 30–40%. This systematic underestimation is a well-known limitation of semi-local exchange-correlation functionals: the Kohn–Sham gap (the difference between the lowest unoccupied and highest occupied Kohn–Sham eigenvalues) is smaller than the true quasiparticle gap because the exchange-correlation potential lacks the derivative discontinuity of the exact functional. Quantitative band-gap predictions require more sophisticated approaches such as hybrid functionals (e.g. HSE06) or many-body perturbation theory in the *GW* approximation.
+6. The DFT value underestimates the experimental gap (~8.5 eV) by roughly 30–40%. This systematic underestimation is a well-known limitation of semi-local exchange-correlation functionals: the Kohn–Sham gap (the difference between the lowest unoccupied and highest occupied Kohn–Sham eigenvalues) is smaller than the true quasiparticle gap because the exchange-correlation potential lacks the derivative discontinuity of the exact functional. Quantitative band-gap predictions require more sophisticated approaches such as hybrid functionals (e.g. HSE06),  many-body perturbation theory in the *GW* approximation (see day 3), or Koopmans functionals (day 5).
 
 </details>
 
