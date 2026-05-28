@@ -7,10 +7,7 @@ In this exercise you will compute the KI band structure of bulk silicon. There a
 1. **The variational orbitals are now maximally-localised Wannier functions (MLWFs)** instead of Kohn–Sham orbitals.
 2. **The screening parameters are computed via DFPT** instead of via constrained ΔSCF calculations in a supercell.
 
-This exercise is adapted from the `koopmans` documentation.
-
-> **Note**
->
+> [!NOTE]
 > Unlike a ΔSCF calculation, the DFPT screening for silicon is cheap enough to run live during this session: it is performed by linear response in the primitive cell, here on a coarse `dfpt_coarse_grid` of `[2, 2, 2]`. The screening parameters are therefore computed on the fly rather than supplied in advance.
 
 ## Files provided
@@ -28,37 +25,29 @@ Open `si.json` and locate the `workflow` block:
     "task": "singlepoint",
     "functional": "ki",
     "method": "dfpt",
+    "gb_correction": false,
     "init_orbitals": "mlwfs",
-    "alpha_guess": 0.077,
     "orbital_groups_spread_tol": 0.01,
-    "mp_correction": false,
     "pseudo_library": "PseudoDojo/0.4/LDA/SR/standard/upf",
-    "calculate_bands": true,
-    "dfpt_coarse_grid": [2, 2, 2]
+    "calculate_bands": true
   }
 }
 ```
 
-### Part A
-
-Compare this block against the one from Exercise 2. Identify and explain each difference:
+Compare this block against the one from Exercise 2. Identify and try to understand each difference:
 
 - `task: singlepoint` (we'll change this in Problems 2 and 3)
 - `method: dfpt` instead of `dscf`
 - `init_orbitals: mlwfs` instead of `kohn-sham`
-- `alpha_guess` (a single starting value, refined by the DFPT screening) instead of `alpha_numsteps`
+- no `alpha_numsteps` — with DFPT the screening is obtained directly from linear response rather than by iterating on a starting guess
 - `orbital_groups_spread_tol` — a tolerance for grouping orbitals
-- `mp_correction`
-- the LDA pseudopotential library (so this is KI@LDA) instead of the PBE one
-- `dfpt_coarse_grid` and `calculate_bands`
 
-### Part B
+<details>
+<summary><b>Solution</b></summary>
 
-`mp_correction` toggles the *Makov–Payne* finite-size correction, which accounts for the spurious electrostatic interaction of a charged simulation cell with its periodic images. Why does the DFPT approach — which computes the screening by linear response in the primitive cell — not need this correction, so that it can be set to `false`?
+The input keywords are explained [here](https://koopmans-functionals.org/en/latest/input_file/workflow_keywords.html)
 
-### Part C
-
-Inspect the `calculator_parameters.w90` block. The projections are split into two sub-lists (so-called "blocks") of `sp3` orbitals. Why are the occupied (bonding) and empty (antibonding) manifolds Wannierized in separate blocks?
+</details>
 
 ## Problem 2: The Wannierization
 
@@ -76,26 +65,20 @@ This task performs an SCF calculation, an NSCF calculation, a Wannierization of 
 
 ### Part B
 
-Inspect `si_bandstructure.png`. Do the interpolated bands lie on top of the explicit ones? If not, where do the largest discrepancies appear, and in which energy window?
+Inspect `si_bandstructure.png`. Do the interpolated bands lie on top of the explicit ones? If not, what could we do to fix this?
 
-### Part C
+<details>
+<summary><b>Solution</b></summary>
 
-The Wannierization of the empty (antibonding) manifold uses two **disentanglement** keywords, which you can find in the `w90` block of `si.json`:
+YOu should see some fairly substantial discrepancies between the actual and interpolated bands. This is because our calculation is underconverged.
 
-```json
-"dis_froz_max": 10.6,
-"dis_win_max": 16.9
-```
+To fix this, one would typically increase the size of the _**k**_-point mesh
 
-`dis_win_max` is the upper bound of the disentanglement window (within which Bloch states are mixed to construct the Wannier functions); `dis_froz_max` is the upper bound of the frozen window (within which the Bloch states are *exactly* preserved). Try varying these values by ±1 eV and see how the interpolated band structure changes.
-
-> **Tip**
->
-> When you run the same workflow more than once, `koopmans` will reuse intermediate results from previous runs by default. If you want to start from scratch, set `"from_scratch": true` in the `engine` block of `si.json`.
+</details>
 
 ## Problem 3: Running the KI calculation
 
-Now change `"task"` back to `"singlepoint"` and re-run
+Now change `"task"` back to `"singlepoint"` and, keeping the _**k**_-point grid at 2×2×2 (for the sake of speed), re-run
 
 ```bash
 koopmans run si.json | tee si_ki.md
@@ -106,52 +89,92 @@ This time the workflow proceeds beyond the Wannierization to actually compute th
 - a **Wannierization** block (the same one you just ran),
 - a **`wann2kc`** step, which converts the Wannier90 files into a format readable by `kcw.x`,
 - a **`screen`** step, in which the screening parameters $\alpha_i$ are computed via DFPT,
-- a **`ham`** step, which constructs the Koopmans Hamiltonian,
+- a **`ham`** step, which constructs and diagonalises the Koopmans Hamiltonian,
 - an **`unfold and interpolate`** step, which produces the final band structure.
 
 ### Part A
 
 Contrast this workflow with the one you saw for ozone. In the DFPT workflow, where does the cost of computing the screening parameters go? Why is this expected to scale much better with system size than ΔSCF?
 
+<details>
+<summary><b>Solution</b></summary>
+
+In ΔSCF the cost of one screening parameter is a supercell SCF, which scales as $(N_\mathrm{el}^\mathrm{SC})^3$ (where $N_\mathrm{el}^\mathrm{SC}$ is the number of electrons in the supercell). In DFPT we instead do a primitive-cell SCF — $(N_\mathrm{el}^\mathrm{PC})^3$ — repeated over $N_q$ monochromatic perturbations. Using $N_\mathrm{el}^\mathrm{SC} = N_k N_\mathrm{el}^\mathrm{PC}$ and $N_q = N_k$, the ratio of costs is $T_\mathrm{SC}/T_\mathrm{PC} \propto N_q$. Thus, as the supercell (equivalently, the _**q**_-grid) grows, DFPT wins by a factor of $N_q$.
+
+</details>
+
 ### Part B
 
-What is the role of `wann2kc`? Why is this conversion step needed when going from a Wannier90 output to a Koopmans calculation?
+By construction, the Koopmans correction depends on the screening parameter $\alpha_i$ of each orbital — orbitals with $\alpha_i$ close to 1 are corrected strongly, while orbitals with $\alpha_i$ close to 0 are barely shifted. Inspect the screening parameters that were computed in `si_ki.md`. How do they compare? What does this tell you about how strongly the electrons in a covalent semiconductor like silicon screen?
+
+<details>
+<summary><b>Solution</b></summary>
+
+</details>
 
 ## Problem 4: Plotting and analysing the band structure
 
-The `singlepoint` task generates `si_bandstructure.png` automatically. For a more comprehensive plot, run
+The `singlepoint` task generates a few plots automatically. But for a prettier, more comprehensive plot, run
 
 ```bash
 python plot_bandstructures.py
 ```
 
-This produces `si_bandstructures.png`, comparing the LDA band structure against the KI@LDA one and labelling the band gap.
+This produces `si_bandstructures.png`, overlaying the LDA band structure against the KI@LDA one and labelling the band gap.
 
 ### Part A
 
 Inspect `si_bandstructures.png`. What is the KI@LDA band gap? Compare it against
 
-- the LDA band gap (read off the same plot),
+- the LDA band gap (try modifying the script so that it labels the LDA gaps instead)
 - the experimental gap of 1.17 eV[^Madelung2004]. Our calculation is for a static lattice (it neglects electron–phonon coupling), so the fair comparison is against the experimental value with the zero-point renormalisation of 0.06 eV[^Miglio2020] added back — i.e. **1.23 eV**.
-- and the KI@LDA result of ‹REFERENCE KI@LDA Si GAP — please provide› eV from Nguyen *et al.* (2018)[^Nguyen2018].
+
+<details>
+<summary><b>Solution</b></summary>
+
+![Si band structure: LDA vs KI@LDA](solutions/si_bandstructures.png)
+
+</details>
 
 ### Part B
 
-The KI calculation does not change the *shape* of the LDA band structure dramatically — it primarily acts as a *scissor* that opens up the gap. Looking at the bands away from the gap, can you identify any features that *are* modified beyond a rigid shift?
+Does anything about the Koopmans band structure that you obtain look strange, or indicative of underconvergence?
+
+<details>
+<summary><b>Solution</b></summary>
+Look closely at the conduction band minimum (CBM) along the Γ–X segment in `si_bandstructures.png`. Here the band looks looks wiggly: it is not interpolating the bands very well.
+
+</details>
 
 ### Part C
 
-By construction, the Koopmans correction depends on the screening parameter $\alpha_i$ of each orbital — orbitals with $\alpha_i$ close to 1 are corrected strongly, while orbitals with $\alpha_i$ close to 0 are barely shifted. Inspect the screening parameters that were computed in `si_ki.md`. They are much smaller than the values you saw for ozone — what does this tell you about how strongly the electrons in a covalent semiconductor like silicon screen the Koopmans correction?
+We have a trick to overcome this issue. The KI Hamiltonian splits into a DFT part and a small, slowly-varying Koopmans correction, so the interpolated Hamiltonian can be written as
 
-## Problem 5: Take-aways
+$$h^\mathrm{KI}_{mn}(\mathbf{k}) = \sum_{\mathbf{R}'} e^{i\mathbf{k}\cdot\mathbf{R}'}\, h^\mathrm{DFT}_{mn}(\mathbf{R}') + \sum_{\mathbf{R}} e^{i\mathbf{k}\cdot\mathbf{R}}\, v^\mathrm{KI}_{mn}(\mathbf{R}),$$
 
-### Part A
+In principle, there is no need for the two parts of the Hamiltonian to be evaluated on the same real-space mesh (or, equivalently the same _**q**_-point grid). Indeed, because the Koopmans correction is more slowly-varying, it can be evaluated on a coarser mesh. This is controlled by the `smooth_int_factor` keyword, which we were already using:
 
-Summarise the differences between Exercise 2 (ozone, ΔSCF, KS orbitals) and Exercise 3 (Si, DFPT, Wannier orbitals). For each difference, explain *why* the choice is appropriate to the system.
 
-### Part B
+```json
+"ui": {
+    "smooth_int_factor": 3
+}
+```
 
-In both exercises we obtained agreement with experiment for a charged-excitation property (IP/EA for ozone; band gap for Si), starting from a semi-local DFT functional that on its own gives the wrong answer by several eV. What is the physical content of the screening parameters $\alpha_i$, and why does enforcing the Koopmans condition fix the eigenvalues so dramatically?
+in `si.json`. This factor defines how many times larger the DFT mesh is relative to the Koopmans mesh. Increasing `smooth_int_factor` refines that mesh. For example, repeating the same calculation with `smooth_int_factor: 4` yields the following bandstructure
+
+![Band structure with smooth_int_factor = 4](solutions/si_bandstructures_smooth_int_4.png)
+
+The CBM region is now much better resolved. You don't need to rerun the workflow with this setting yourself — the DFT calculations become considerably more expensive — but it is worth being aware that the apparent quality of the CBM in your plot is sensitive to the underlying DFT calculation as well as the KI correction.
+
+Why is this not true of the direct Γ → Γ gap?
+
+<details>
+<summary><b>Solution</b></summary>
+
+Γ is included in the (uniform) 2×2×2 **k**-point grid on which the Koopmans Hamiltonian is computed, so its value there is exact — no interpolation is required. The CBM near X, by contrast, falls *between* the points of this coarse mesh, so its energy is reconstructed by the smooth-interpolation procedure and is sensitive to `smooth_int_factor`.
+
+</details>
 
 [^Nguyen2018]: N. L. Nguyen, N. Colonna, A. Ferretti, and N. Marzari, *Koopmans-Compliant Spectral Functionals for Extended Systems*, Phys. Rev. X **8**, 021051 (2018). [doi:10.1103/PhysRevX.8.021051](https://doi.org/10.1103/PhysRevX.8.021051).
 [^Madelung2004]: O. Madelung, *Semiconductors*, 3rd ed. (Springer-Verlag, Berlin, 2004).

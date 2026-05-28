@@ -45,7 +45,7 @@ Inspect the `atoms` block — what is the geometry of the system? Why is the sim
 - ozone is a bent molecule, with a bond length ≈ 1.27 Å and a bond angle of 117°
 - the simulation cell is padded with vacuum so the molecule does not interact with its periodic images (plane-wave codes still use a supercell internally, even when the system is treated as non-periodic)
 
-> **Note**
+> [!NOTE]
 > The padding is especially important for ΔSCF calculations, where we will be performing calculations in which the molecule acquires a net charge — charged periodic images interact through the long-range Coulomb tail, so the vacuum buffer needs to be even larger than for the neutral system
 
 </details>
@@ -103,8 +103,7 @@ For ozone (a closed-shell molecule) a direct `nspin = 2` run actually converges 
 </details>
 </br>
 
-> **Note**
->
+> [!NOTE]
 > From this point onward in the workflow the density will not change. This is because the KI functional, by construction, gives back the same density as its base functional (here PBE). This is *not* true for KIPZ — there, the density does change.
 
 
@@ -112,7 +111,7 @@ For ozone (a closed-shell molecule) a direct `nspin = 2` run actually converges 
 
 The second phase of the workflow computes one screening parameter $\alpha_i$ per orbital, using the ΔSCF method (see the lecture).
 
-These calculations live under `01-koopmans-dscf/02-calculate-screening-via-dscf/`, organised into one sub-directory per iteration of the screening loop (`01-iteration-1`, `02-iteration-2`, ...). Each iteration begins with a trial KI calculation (`01-ki`), followed by one sub-directory per orbital (`02-orbital-1`, `03-orbital-2`, ..., `11-orbital-10`).
+These calculations live under `01-koopmans-dscf/02-calculate-screening-via-dscf/`. Each iteration begins with a trial KI calculation (`01-ki`), followed by one sub-directory per orbital (`02-orbital-1`, `03-orbital-2`, ..., `11-orbital-10`).
 
 For each *filled* orbital $i$ (orbitals 1–9 of ozone), the code performs a single constrained $N{-}1$-electron PBE calculation in which orbital $i$ is frozen and emptied while the remaining density is allowed to relax. This yields $E_i(N{-}1)$, which combined with $E(N)$, $\lambda_{ii}^\alpha(1)$, and $\lambda_{ii}^0(1)$ (all of which come from the trial KI calculation) is enough to update $\alpha_i$ from its initial guess of $\alpha_i^0 = 0.6$. This is exactly the same linear-extrapolation formula you derived and applied to the HOMO in Exercise 1 — `koopmans` is simply running it for every orbital.
 
@@ -250,7 +249,7 @@ A Koopmans calculation requires running many constrained DFT calculations — on
 </details>
 <br>
 
-The final exercise, on bulk ZnO, addresses exactly this issue by using a different — much more efficient — method for computing the screening parameters: density-functional perturbation theory (DFPT).
+The final exercise, on bulk silicon, addresses exactly this issue by using a different — much more efficient — method for computing the screening parameters: density-functional perturbation theory (DFPT).
 
 
 [^NIST-O3]: [NIST Chemistry WebBook, SRD 69 — Ozone, ion energetics](https://webbook.nist.gov/cgi/cbook.cgi?ID=C10028156&Mask=20#Ion-Energetics).

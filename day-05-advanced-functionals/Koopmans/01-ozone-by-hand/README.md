@@ -13,8 +13,7 @@ The aim is to demystify what a Koopmans calculation actually does: you will comp
 - [`ozone_ki.in`](ozone_ki.in) — `kcp.x` input for the trial KI calculation
 - [`get_alpha.sh`](get_alpha.sh) — a shell script that applies the screening formula from the lecture
 
-> **Note**
->
+> [!NOTE]
 > All four calculations share the same `prefix` (`kc`) and `outdir` (`TMP/`), and communicate through restart files labelled by the `ndr`/`ndw` units. Run the steps below **in order** — each one reads the wavefunctions written by the previous one.
 
 ## Problem 1: Setting up the environment
@@ -33,7 +32,7 @@ If `which` prints nothing, ask a tutor before continuing.
 Run the DFT calculation for the neutral $N$-electron ozone molecule:
 
 ```bash
-mpirun kcp.x -in ozone_dft.in > ozone_dft.out
+mpirun kcp.x -in ozone_dft.in | tee ozone_dft.out
 ```
 
 Check that the calculation completed successfully before continuing.
@@ -69,7 +68,7 @@ For molecules, the Kohn–Sham orbitals are used directly as the variational orb
 Now run the DFT calculation for the charged system:
 
 ```bash
-mpirun kcp.x -in ozone_dft_n-1.in > ozone_dft_n-1.out
+mpirun kcp.x -in ozone_dft_n-1.in | tee ozone_dft_n-1.out
 ```
 
 Again, make sure the calculation finishes correctly.
@@ -127,7 +126,7 @@ Open `ozone_ki.in` and replace the `<alpha>` placeholder in the `&NKSIC` block w
 Then run the trial KI calculation:
 
 ```bash
-mpirun kcp.x -in ozone_ki.in > ozone_ki.out
+mpirun kcp.x -in ozone_ki.in | tee ozone_ki.out
 ```
 
 ### Part A
@@ -237,7 +236,7 @@ Create a new input file `ozone_ki_opt.in` by copying `ozone_ki.in` and making tw
 Then run the final KI calculation at the optimal screening parameter:
 
 ```bash
-mpirun kcp.x -in ozone_ki_opt.in > ozone_ki_opt.out
+mpirun kcp.x -in ozone_ki_opt.in | tee ozone_ki_opt.out
 ```
 
 ### Part A
@@ -270,7 +269,7 @@ A full Koopmans calculation needs one screening parameter for *every* orbital, a
 ... for a total of 12 calculations if we don't do any self-consistency, 22 for two iterations, _etc._
 
 
-> **Note**
+> [!NOTE]
 > Self-consistency with KI is unnecessary, and we can often take advantage of symmetries to not have to compute from scratch screening parameters for every orbital.
 </details>
 <br>

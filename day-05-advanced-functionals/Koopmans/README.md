@@ -2,7 +2,7 @@
 
 **Tutors**: Nicola Colonna and Edward Linscott
 
-In this session we will use the [`koopmans`](https://koopmans-functionals.org) package to run Koopmans spectral-functional calculations on two systems: the ozone molecule and bulk zinc oxide.
+In this session we will use the [`koopmans`](https://koopmans-functionals.org) package to run Koopmans spectral-functional calculations on two systems: the ozone molecule and bulk silicon.
 
 ## Background
 
@@ -21,11 +21,10 @@ Any given Koopmans calculation requires several ingredients:
 
 - [`01-ozone-by-hand/`](01-ozone-by-hand/README.md) — Compute a screening parameter for ozone "by hand", running the underlying `kcp.x` calculations directly and applying the screening formula yourself.
 - [`02-ozone-automated/`](02-ozone-automated/README.md) — Compute the ionisation potential and electron affinity of ozone using KI with the **ΔSCF** screening method, automated end-to-end with the `koopmans` package.
-- [`03-zno-dfpt/`](03-zno-dfpt/README.md) — Compute the band structure of bulk ZnO using KI with the **DFPT** screening method.
+- [`03-si-dfpt/`](03-si-dfpt/README.md) — Compute the band structure of bulk silicon using KI with the **DFPT** screening method.
 
-> **Note**
->
-> Before starting, check that `koopmans` is installed by running `workon koopmans; koopmans --help` in your terminal. If you don't see a help message, ask a tutor.
+> [!NOTE]
+> Before starting, run `cdd 5` in your terminal to set up the environment for today's session, then check that `koopmans` is installed by running `koopmans --help`. If you don't see a help message, ask a tutor.
 
 ## Further reading
 
