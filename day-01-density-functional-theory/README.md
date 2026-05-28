@@ -671,7 +671,7 @@ NaCl has a rocksalt structure with an FCC Bravais lattice. The FCC first Brillou
 
 We will trace the path **L → Γ → X → W → K → Γ**. Convince yourself that the crystal-coordinate columns are correct by expressing each Cartesian vector as a linear combination of the FCC reciprocal primitive vectors for `ibrav = 2`.
 
-> [!NOTE]
+> [!TIP]
 >
 > Instead of setting the k-path by hand, you can use the [SeekPath](https://www.materialscloud.org/work/tools/seekpath) tool on Materials Cloud:
 >
