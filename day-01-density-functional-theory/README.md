@@ -804,7 +804,6 @@ ax.set_xticks(ks)
 ax.set_xticklabels(lbls)
 
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_ylim(-20, 15)    # adjust to your output
 ax.set_xlim(bands[0][0, 0], bands[0][-1, 0])
 plt.tight_layout()
 plt.savefig('NaCl_bands.png', dpi=150)
@@ -835,10 +834,10 @@ Analyse your band structure.
 1. There are **8 bands** below the Fermi level, consistent with 16 valence electrons.
 
 2. From lowest to highest energy, the eight occupied bands fall into four groups:
-   - **1 flat band**, nearly dispersionless (~−22 to −20 eV).
-   - **3 closely-spaced narrow bands** (~−18 to −15 eV).
-   - **1 isolated band** (~−10 to −8 eV).
-   - **3 dispersive bands** forming the top of the valence manifold (~−5 to 0 eV).
+   - **1 flat band**, deep and nearly dispersionless.
+   - **3 closely-spaced narrow bands**, also nearly dispersionless.
+   - **1 isolated band** at intermediate energy.
+   - **3 dispersive bands** forming the top of the valence manifold.
 
    The atomic-orbital character of each group cannot be read off from the band structure alone — it will be identified using the projected DOS in Part F and confirmed with the fat-band plot in Part G.
 
@@ -981,16 +980,16 @@ Identify the groups of peaks in the DOS and relate them to the bands you saw in 
 
 ![NaCl density of states](solutions/NaCl_dos.png)
 
-The total DOS shows distinct groups of peaks separated by gaps:
+The total DOS shows distinct groups of peaks separated by gaps. Working from low to high energy (and matching them to the four band groups identified in Part E):
 
-- **Lowest group (~−22 to −20 eV)**: a narrow, intense peak from the Na 2s band. This band is nearly dispersionless across the BZ (the 2s orbital is core-like and barely overlaps with neighbours), so many states pile up at almost the same energy — a classic **van Hove singularity**.
-- **Second group (~−18 to −15 eV)**: three overlapping peaks from the Na 2p manifold, likewise quite narrow.
-- **Third group (~−10 to −8 eV)**: a broader peak from the Cl 3s band.
-- **Valence band (~−5 to 0 eV)**: three broader, strongly overlapping peaks from the Cl 3p manifold. The Cl 3p orbitals have larger spatial extent and stronger inter-site hopping than the Na core-like states, leading to greater bandwidth and smoother features.
-- **Gap of ~5–6 eV** above $E_F$, consistent with the band structure in Part E.
+- **Na 2s**: deepest semicore, far below the rest. The PDOS confirms this is the lowest flat band of Part E.
+- **Na 2p**: a sharp peak from the three-fold Na 2p manifold; nearly dispersionless across the BZ (the 2p semicore orbital barely overlaps with neighbours), so many states pile up at almost the same energy — a classic **van Hove singularity**.
+- **Cl 3s**: a sharp peak from the isolated, narrow band.
+- **Cl 3p (valence band)**: three broader, strongly overlapping peaks forming the top of the valence manifold. The Cl 3p orbitals have larger spatial extent and stronger inter-site hopping than the Na semicore states, leading to greater bandwidth and smoother features.
+- **Gap** above $E_F$, consistent with the band structure in Part E.
 - **Conduction band** starting just above the gap, with initial Na 3s character.
 
-The Na 2s and 2p bands give the sharpest peaks because they are the flattest bands: flat dispersion means $|\nabla_\mathbf{k} E_n(\mathbf{k})|$ is small, which drives the DOS to diverge (van Hove singularity). The PDOS confirms these orbital assignments directly.
+The Na 2s, Na 2p, and Cl 3s peaks are the sharpest because they come from the flattest bands: flat dispersion means $|\nabla_\mathbf{k} E_n(\mathbf{k})|$ is small, which drives the DOS to diverge (van Hove singularity). The PDOS confirms the atomic-orbital assignments directly.
 
 </details>
 

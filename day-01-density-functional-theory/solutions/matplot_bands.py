@@ -62,7 +62,6 @@ ax.set_xticks(ks)
 ax.set_xticklabels(lbls)
 
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_ylim(-20, 15)    # adjust to your output
 ax.set_xlim(bands[0][0, 0], bands[0][-1, 0])
 plt.tight_layout()
 plt.savefig('NaCl_bands.png', dpi=150)
