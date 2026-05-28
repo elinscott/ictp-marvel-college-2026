@@ -995,6 +995,10 @@ To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as 
 
 Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **Na 2p** on the same axes using different colour maps.
 
+> **Note**
+>
+> Each orbital has weight in a different energy region, so a single energy window may not show all characters well. When focusing on a specific orbital, tighten the window: the energy mask is set on the line starting `emask = ...` and the axis limits on `ax.set_ylim(...)`. For example, Na 2p character sits around −20 to −15 eV and would require widening both lines accordingly.
+
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1035,16 +1039,23 @@ def load_kdos(filename, nk):
 Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)', nk)
 
 # Restrict to a useful energy window
-emask = (Egrid - efermi >= -25) & (Egrid - efermi <= 10)
+# Focus on the Cl 3p region; adjust limits when overlaying other orbitals
+emask = (Egrid - efermi >= -8) & (Egrid - efermi <= 5)
 E_plot  = Egrid[emask] - efermi
 K, Emesh = np.meshgrid(k_path, E_plot)
 
+# Clip at the 95th percentile of non-zero values so that weaker features
+# are not washed out by the sharp band peaks
+flat = cl_p[:, emask].ravel()
+vmax = np.percentile(flat[flat > 0], 95)
+
 fig, ax = plt.subplots(figsize=(5, 7))
-ax.pcolormesh(K, Emesh, cl_p[:, emask].T, cmap='Oranges', shading='auto')
+ax.pcolormesh(K, Emesh, cl_p[:, emask].T,
+              cmap='Reds', shading='auto', vmin=0, vmax=vmax)
 
 ax.axhline(0, color='k', lw=0.5, ls='--')
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_ylim(-25, 10)
+ax.set_ylim(-8, 5)
 ax.set_xlim(k_path[0], k_path[-1])
 
 # High-symmetry point markers (fill in from bands_pp.out, as in Part D)
