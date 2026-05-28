@@ -950,113 +950,126 @@ The Na 2s and 2p bands give the sharpest peaks because they are the flattest ban
 
 A **fat band** plot overlays the orbital character on the band structure: each point $(k, E_n(\mathbf{k}))$ is drawn with a symbol whose area is proportional to the projection weight $\sum_{m_l} |\langle \phi_{\alpha,l,m_l} | \psi_{n\mathbf{k}} \rangle|^2$ onto a chosen atomic orbital $(\alpha, l)$. This makes the orbital character immediately visible without relying on colour-coded energy windows.
 
-Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh from Part F) with `lbands = .true.`:
+Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh from Part F) with `kresolveddos = .true.`:
 
 ```text
 &PROJWFC
    outdir   = './tmp/'
    prefix   = 'NaCl'
    filproj  = 'NaCl_fatbands'
-   lbands   = .true.
+   kresolveddos = .true.
 /
 ```
 
-The program writes `NaCl_fatbands.projwfc_up`. Its layout is:
+The program writes two kinds of output file.
+
+**`NaCl_fatbands.projwfc_up`** — projection weights. After several system-information header lines, it contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
 
 ```text
-nk  nbnd  nwfc                           ← header
-# nwfc lines, one per atomic wavefunction:
-  atom_idx  wfc_idx  element  n  l  m  ind
-# then nk blocks:
-  ik  1  kx  ky  kz                      ← k-point line
-  E_1  p_1  p_2  ...  p_nwfc             ← band 1: energy (eV) + projections
-  E_2  p_1  p_2  ...  p_nwfc             ← band 2
-  ...
+global_idx  atom_idx  element  orbital_label  n  l  m
 ```
+
+where `global_idx` is a global sequential counter, `atom_idx` is the atom number in the input, `orbital_label` is a human-readable name (e.g. `2S`, `3P`), and `n`, `l`, `m` are the principal, angular-momentum, and magnetic quantum numbers. The key line in the full header (before the blocks) reads `nwfc nk nbnd`. Each block then contains `nk × nbnd` lines of the form `ik  ibnd  weight`, where `weight` $= |\langle\phi_{\alpha,l,m}|\psi_{n\mathbf{k}}\rangle|^2$.
+
+**`NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)`** — k-resolved projected DOS files, one per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
+
+The association between a block in `projwfc_up` and a pdos file is determined by `atom_idx`, `l`, and the sequential index of the $(n,l)$ group within that atom. For NaCl the full table is:
+
+| global idx | atom | elem | orbital | $n$ | $l$ | $m$ | pdos file |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| 1 | 1 | Na | 2S | 1 | 0 | 1 | `pdos_atm#1(Na)_wfc#1(s)` |
+| 2 | 1 | Na | 2P | 2 | 1 | 1 | `pdos_atm#1(Na)_wfc#2(p)` |
+| 3 | 1 | Na | 2P | 2 | 1 | 2 | `pdos_atm#1(Na)_wfc#2(p)` |
+| 4 | 1 | Na | 2P | 2 | 1 | 3 | `pdos_atm#1(Na)_wfc#2(p)` |
+| 5 | 1 | Na | 3S | 3 | 0 | 1 | `pdos_atm#1(Na)_wfc#3(s)` |
+| 6 | 2 | Cl | 3S | 1 | 0 | 1 | `pdos_atm#2(Cl)_wfc#1(s)` |
+| 7 | 2 | Cl | 3P | 2 | 1 | 1 | `pdos_atm#2(Cl)_wfc#2(p)` |
+| 8 | 2 | Cl | 3P | 2 | 1 | 2 | `pdos_atm#2(Cl)_wfc#2(p)` |
+| 9 | 2 | Cl | 3P | 2 | 1 | 3 | `pdos_atm#2(Cl)_wfc#2(p)` |
+
+Note that multiple global indices sharing the same $(n,l)$ group (different $m_l$) all map to the **same** pdos file: the `ldos` column of that file is their sum.
+
+Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p bands at $\Gamma$), extracting discrete eigenvalues by peak-finding is unreliable. Instead, the k-resolved `ldos` column of the pdos file is plotted directly as a two-dimensional intensity map — energy on the $y$-axis, k-point index on the $x$-axis — which is equivalent to fat bands and handles degeneracies naturally. The k-path $x$-coordinates are the same ones computed from `NaCl_bands.dat.gnu` in Part D; the k-point index `ik` (1-based) maps directly to position `ik − 1` in that array.
 
 To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Part D.
 
-Below is a complete example that highlights the **Cl 3p** contribution. Run it, examine which bands light up, and then add the **Na 2s** and **Na 2p** projections to the same axes. (Optionally also add Cl 3s.)
+Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **Na 2p** on the same axes using different colour maps.
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from collections import deque
 
-# --- Parse NaCl_fatbands.projwfc_up ---
-with open('NaCl_fatbands.projwfc_up') as f:
-    nk, nbnd, nwfc = map(int, f.readline().split())
-
-    wfc_info = []
-    for _ in range(nwfc):
-        parts = f.readline().split()
-        wfc_info.append({'atom': int(parts[0]),
-                         'element': parts[2],
-                         'l': int(parts[4]),
-                         'm': int(parts[5])})
-
-    kcoords     = np.zeros((nk, 3))
-    energies    = np.zeros((nk, nbnd))
-    projections = np.zeros((nk, nbnd, nwfc))
-    for ik in range(nk):
-        kcoords[ik] = list(map(float, f.readline().split()[2:5]))
-        for ib in range(nbnd):
-            vals = list(map(float, f.readline().split()))
-            energies[ik, ib]       = vals[0]
-            projections[ik, ib, :] = vals[1:]
-
-# k-path coordinate (cumulative reciprocal-space arc length)
-k_path = np.zeros(nk)
-for ik in range(1, nk):
-    k_path[ik] = k_path[ik - 1] + np.linalg.norm(kcoords[ik] - kcoords[ik - 1])
-
-# Read highest occupied level from SCF output (same file used in Part D)
-e_fermi = None
-with open('scf.out') as f:   # replace with your SCF output file name
+# --- Fermi level from SCF output ---
+efermi = None
+with open('scf.out') as f:        # replace with your SCF output filename
     for line in f:
         if 'highest occupied' in line:
-            e_fermi = float(line.split(':')[1].split()[0])
+            efermi = float(line.split(':')[1].split()[0])
             break
-energies -= e_fermi
 
-# --- Print wfc table so you can identify which indices to use ---
-print(f"{'idx':>4}  {'atom':>5}  {'elem':>5}  {'l':>3}  {'m':>3}")
-for i, w in enumerate(wfc_info):
-    print(f"{i:4d}  {w['atom']:5d}  {w['element']:>5}  {w['l']:3d}  {w['m']:3d}")
+# --- k-path coordinates from bands.dat.gnu (Part D) ---
+k_path = []
+with open('NaCl_bands.dat.gnu') as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            k_path.append(float(line.split()[0]))
+        else:
+            break                  # only need the first band
+k_path = np.array(k_path)         # shape (nk,)
+nk = len(k_path)
 
-# --- Select Cl 3p (element 'Cl', l = 1) and sum over m ---
-cl_p_idx    = [i for i, w in enumerate(wfc_info)
-               if w['element'].strip() == 'Cl' and w['l'] == 1]
-cl_p_weight = projections[:, :, cl_p_idx].sum(axis=-1)   # shape: (nk, nbnd)
+# --- Load k-resolved ldos from a pdos_atm file ---
+def load_kdos(filename, nk):
+    """Return (Egrid, intensity) where intensity[ik, iE] = ldos."""
+    d = np.genfromtxt(filename, comments='#')
+    nE = int(np.sum(d[:, 0] == 1))
+    Egrid = d[d[:, 0] == 1, 1]
+    intensity = np.zeros((nk, nE))
+    for ik in range(1, nk + 1):
+        intensity[ik - 1] = d[d[:, 0] == ik, 2]   # col 2 = ldos (sum over m)
+    return Egrid, intensity
 
-# --- Plot ---
+# --- Cl 3p ---
+Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)', nk)
+
+# Restrict to a useful energy window
+emask = (Egrid - efermi >= -25) & (Egrid - efermi <= 10)
+E_plot  = Egrid[emask] - efermi
+K, Emesh = np.meshgrid(k_path, E_plot)
+
 fig, ax = plt.subplots(figsize=(5, 7))
-
-# Background: all bands in light grey
-for ib in range(nbnd):
-    ax.plot(k_path, energies[:, ib], color='lightgrey', lw=0.7, zorder=1)
-
-# Fat band: Cl 3p
-scale = 300    # point-area scale factor — adjust to taste
-for ib in range(nbnd):
-    ax.scatter(k_path, energies[:, ib],
-               s=scale * cl_p_weight[:, ib],
-               color='tab:orange', alpha=0.7, linewidths=0, zorder=2,
-               label='Cl $3p$' if ib == 0 else '')
+ax.pcolormesh(K, Emesh, cl_p[:, emask].T, cmap='Oranges', shading='auto')
 
 ax.axhline(0, color='k', lw=0.5, ls='--')
 ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(-25, 10)
-ax.legend()
+ax.set_xlim(k_path[0], k_path[-1])
 
-# Add vertical lines and x-tick labels at high-symmetry points
-# (read k-coordinates from bands_pp.out, as in Part D)
+# High-symmetry point markers (fill in from bands_pp.out, as in Part D)
+hs_points = deque([
+    (k_L,  'L'),
+    (k_G,  r'$\Gamma$'),
+    (k_X,  'X'),
+    (k_W,  'W'),
+    (k_K,  'K'),
+    (k_G2, r'$\Gamma$'),
+])
+ks, lbls = [], []
+while hs_points:
+    k, lbl = hs_points.popleft()
+    ax.axvline(k, color='k', lw=0.5)
+    ks.append(k); lbls.append(lbl)
+ax.set_xticks(ks)
+ax.set_xticklabels(lbls)
 
 plt.tight_layout()
 plt.savefig('NaCl_fatbands_Cl_p.png', dpi=150)
 plt.show()
 ```
 
-Now extend the script to show the **Na 2s** (element `Na`, $l=0$, lowest-energy band group) and **Na 2p** (element `Na`, $l=1$) characters on the same plot, using different colours. What does the resulting fat-band plot tell you about the ionic character of NaCl?
+Now extend the script to overlay **Na 2s** (`pdos_atm#1(Na)_wfc#1(s)`) and **Na 2p** (`pdos_atm#1(Na)_wfc#2(p)`) using different colour maps on the same axes. What does the resulting plot tell you about the ionic character of NaCl?
 
 <details>
 <summary><b>Solution</b></summary>
