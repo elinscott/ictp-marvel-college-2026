@@ -1093,7 +1093,7 @@ Now extend the script to overlay **Na 2s** (`pdos_atm#1(Na)_wfc#1(s)`) and **Na 
 
 ![NaCl fat bands — Cl 3p](solutions/NaCl_fatbands_Cl_p.png)
 
-The fat-band plot reveals the orbital origin of each group of bands:
+The fat-band plot confirms the orbital origin of each group of bands:
 
 - **Cl 3p** weight is almost entirely confined to the three uppermost valence bands (the broad group just below $E_F$). The weight is large throughout the BZ, confirming that these states have predominantly Cl $p$ character — consistent with the ionic picture where Cl carries a full negative charge.
 - **Na 2s** weight lights up exclusively in the lowest, almost dispersionless band.  Because the Na 2s orbital is very compact, it hybridises weakly with its neighbours and the band is nearly flat.
