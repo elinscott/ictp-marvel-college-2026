@@ -852,7 +852,7 @@ and is therefore more directly comparable to spectroscopic measurements (e.g. ph
 ```text
 &SYSTEM
    ...
-   occupations = 'tetrahedra'
+   occupations = 'tetrahedra_opt'
 /
 ...
 K_POINTS automatic
@@ -861,7 +861,7 @@ K_POINTS automatic
 
 > **Note**
 >
-> If `occupations = 'tetrahedra'` causes convergence issues, replace it with Gaussian smearing (`occupations = 'smearing'`, `smearing = 'gaussian'`, `degauss = 0.005`). The resulting broadening of 0.005 Ry ≈ 0.07 eV is far smaller than the band gap and will not obscure it.
+> If `occupations = 'tetrahedra_opt'` causes convergence issues, replace it with Gaussian smearing (`occupations = 'smearing'`, `smearing = 'gaussian'`, `degauss = 0.005`). The resulting broadening of 0.005 Ry ≈ 0.07 eV is far smaller than the band gap and will not obscure it.
 
 **Step 2 — Total DOS with `dos.x`.** Create an input file:
 
@@ -921,6 +921,7 @@ ax.axvline(0, color='k', lw=0.5, ls='--')
 ax.set_xlabel('$E - E_F$ (eV)')
 ax.set_ylabel('DOS (states / eV / cell)')
 ax.set_xlim(-25, 15)
+ax.set_ylim(0, 10)
 ax.legend(fontsize=8)
 plt.tight_layout()
 plt.savefig('NaCl_dos.png', dpi=150)
