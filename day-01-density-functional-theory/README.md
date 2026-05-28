@@ -1030,7 +1030,9 @@ Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh f
 
 The program writes two kinds of output file.
 
-**`NaCl_fatbands.projwfc_up`** — projection weights. After several system-information header lines, it contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
+#### `NaCl_fatbands.projwfc_up` — projection weights
+
+After several system-information header lines, it contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
 
 ```text
 global_idx  atom_idx  element  orbital_label  n  l  m
@@ -1038,7 +1040,9 @@ global_idx  atom_idx  element  orbital_label  n  l  m
 
 where `global_idx` is a global sequential counter, `atom_idx` is the atom number in the input, `orbital_label` is a human-readable name (e.g. `2S`, `3P`), and `n`, `l`, `m` are the principal, angular-momentum, and magnetic quantum numbers. The key line in the full header (before the blocks) reads `nwfc nk nbnd`. Each block then contains `nk × nbnd` lines of the form `ik  ibnd  weight`, where `weight` $= |\langle\phi_{\alpha,l,m}|\psi_{n\mathbf{k}}\rangle|^2$.
 
-**`NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)`** — k-resolved projected DOS files, one per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
+#### `NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)` — k-resolved projected DOS
+
+One file per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
 
 The association between a block in `projwfc_up` and a pdos file is determined by `atom_idx`, `l`, and the sequential index of the $(n,l)$ group within that atom. For NaCl the full table is:
 
