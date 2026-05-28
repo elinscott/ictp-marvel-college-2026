@@ -525,6 +525,14 @@ and the remaining `celldm` values follow analogously.
 <details>
 <summary><b>Solution</b></summary>
 
+Applying the orthorhombic strain to the cubic lattice vectors gives $|a'_1| = a(1+x)$, $|a'_2| = a(1-x)$, and $|a'_3| = a/(1-x^2)$, so the `celldm` values for a given strain `x` are:
+
+```bash
+celldm1=$(echo "$a * (1 + $x)" | bc -l)
+celldm2=$(echo "(1 - $x) / (1 + $x)" | bc -l)
+celldm3=$(echo "1 / ((1 - $x^2) * (1 + $x))" | bc -l)
+```
+
 For each strain $x$, build the strained lattice vectors, run a `relax` calculation, and plot $\Delta E(x)$. Fitting $\Delta E = V_0 (C_{11} - C_{12})\, x^2$ gives $C_{11} - C_{12}$; combining this with $B = \tfrac{1}{3}(C_{11} + 2 C_{12})$ from Problem 6 then yields $C_{11} \approx 47$ GPa and $C_{12} \approx 12$ GPa, close to the experimental values.
 
 ![Parabolic fit for C11 and C12](solutions/fit_c11_c12.png)
@@ -552,6 +560,15 @@ celldm(4) = (a'1 · a'2) / (|a'1| |a'2|)
 
 <details>
 <summary><b>Solution</b></summary>
+
+Applying the monoclinic shear strain to the cubic lattice vectors gives $|a'_1| = |a'_2| = a\sqrt{1 + x^2/4}$, $|a'_3| = 4a/(4 - x^2)$, and $(\mathbf{a}'_1 \cdot \mathbf{a}'_2)/(|a'_1| |a'_2|) = x/(1 + x^2/4)$, so the `celldm` values for a given strain `x` are:
+
+```bash
+celldm1=$(echo "$a * sqrt(1 + $x^2/4)" | bc -l)
+celldm2=1
+celldm3=$(echo "4 / ((4 - $x^2) * sqrt(1 + $x^2/4))" | bc -l)
+celldm4=$(echo "$x / (1 + $x^2/4)" | bc -l)
+```
 
 Likewise, plot $\Delta E(x)$ for the monoclinic shear strain and fit $\Delta E = \tfrac{1}{2} V_0 C_{44}\, x^2$ to extract $C_{44} \approx 12$ GPa, close to the experimental value.
 
@@ -583,7 +600,7 @@ The conventional cell is larger in real space, so its Brillouin zone is smaller.
 
 ---
 
-## Problem 8: Final take-aways
+## Problem 8: Take-aways after calculating the bulk properties
 
 ### Part A
 
