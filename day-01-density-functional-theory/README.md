@@ -689,9 +689,9 @@ For `ibrav = 2` the primitive reciprocal lattice vectors (in Cartesian units of 
 
 A **k**-point with crystal coordinates $`(k_1, k_2, k_3)`$ corresponds to the Cartesian vector $`k_1\,\mathbf{b}_1 + k_2\,\mathbf{b}_2 + k_3\,\mathbf{b}_3`$. Verify X as an example:
 
-$$
+```math
 \tfrac{1}{2}(-1,1,1) + 0\cdot(1,-1,1) + \tfrac{1}{2}(1,1,-1) = (0,1,0). \quad\checkmark
-$$
+```
 
 The remaining points follow analogously.
 
