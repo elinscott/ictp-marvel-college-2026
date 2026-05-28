@@ -379,7 +379,7 @@ Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan i
 > # fit E(V) to obtain the equation-of-state parameters
 > (e0, v0, b0, db0), _ = curve_fit(birch_murnaghan, volumes, energies)
 > print(f'B = {b0}')
->
+> ```
 > 
 > or use the interactive `ev.x` program provided with `Quantum ESPRESSO`. This program works interactively: it expects that you specify units (`Ang` or `ANG` or `ang` indicates Ångströms, while any other input will default to atomic units), the type of Bravais lattice that you used, the type of equation of state that you want to use for the fit (in our case, `birch1`), and an input file. In the input file for `ev.x` you have to provide two columns for the case of an FCC lattice: the first one contains the lattice parameter and the second one the total energy obtained.
 
