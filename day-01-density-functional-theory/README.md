@@ -793,6 +793,13 @@ plt.savefig('NaCl_bands.png', dpi=150)
 plt.show()
 ```
 
+<details>
+<summary><b>Solution</b></summary>
+
+![NaCl band structure](solutions/NaCl_bands.png)
+
+</details>
+
 ### Part E
 
 Analyse your band structure.
@@ -941,6 +948,8 @@ Identify the groups of peaks in the DOS and relate them to the bands you saw in 
 
 <details>
 <summary><b>Solution</b></summary>
+
+![NaCl density of states](solutions/NaCl_dos.png)
 
 The total DOS shows distinct groups of peaks separated by gaps:
 
@@ -1093,6 +1102,8 @@ Now extend the script to overlay **Na 2s** (`pdos_atm#1(Na)_wfc#1(s)`) and **Na 
 
 <details>
 <summary><b>Solution</b></summary>
+
+![NaCl fat bands — Cl 3p](solutions/NaCl_fatbands_Cl_p.png)
 
 The fat-band plot reveals the orbital origin of each group of bands:
 
