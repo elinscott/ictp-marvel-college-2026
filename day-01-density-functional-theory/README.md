@@ -823,7 +823,7 @@ plt.show()
 Analyse your band structure.
 
 1. How many bands lie below the Fermi level ($E = 0$)? Is this consistent with your expectation from Part C?
-2. Describe the character of the groups of bands from the bottom of the valence manifold upward. (*Hint:* recall which atomic orbitals are included in each pseudopotential.)
+2. Describe the groups of bands from the bottom of the valence manifold upward. How many bands are in each group, and how dispersive are they?
 3. Where in the Brillouin zone is the **valence band maximum** (VBM)?
 4. Where is the **conduction band minimum** (CBM)?
 5. Is the band gap **direct** or **indirect**? Estimate its value in eV.
@@ -834,15 +834,17 @@ Analyse your band structure.
 
 1. There are **8 bands** below the Fermi level, consistent with 16 valence electrons.
 
-2. From lowest to highest energy:
-   - **1 flat band**: Na 2s character (low-lying, nearly dispersionless).
-   - **3 narrow bands**: Na 2p character (core-like, very flat).
-   - **1 band**: Cl 3s character.
-   - **3 dispersive bands**: Cl 3p character, forming the top of the valence manifold. These are the broadest bands because the Cl 3p orbitals overlap significantly in the rocksalt structure.
+2. From lowest to highest energy, the eight occupied bands fall into four groups:
+   - **1 flat band**, nearly dispersionless (~−22 to −20 eV).
+   - **3 closely-spaced narrow bands** (~−18 to −15 eV).
+   - **1 isolated band** (~−10 to −8 eV).
+   - **3 dispersive bands** forming the top of the valence manifold (~−5 to 0 eV).
 
-3. The **VBM** is at **Γ**, where the three Cl 3p bands are degenerate.
+   The atomic-orbital character of each group cannot be read off from the band structure alone — it will be identified using the projected DOS in Part F and confirmed with the fat-band plot in Part G.
 
-4. The **CBM** is also at **Γ** (predominantly Na 3s / empty-cation-$s$ character).
+3. The **VBM** is at **Γ**, where three bands are degenerate.
+
+4. The **CBM** is also at **Γ**.
 
 5. The gap is **direct** at Γ. The DFT-PBE band gap is approximately **5–6 eV**.
 
