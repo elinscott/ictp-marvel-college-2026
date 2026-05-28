@@ -833,12 +833,12 @@ Analyse your band structure.
 1. There are **8 bands** below the Fermi level, consistent with 16 valence electrons.
 
 2. From lowest to highest energy, the eight occupied bands fall into four groups:
-   - **1 flat band**, deep and nearly dispersionless.
-   - **3 closely-spaced narrow bands**, also nearly dispersionless.
-   - **1 isolated band** at intermediate energy.
-   - **3 dispersive bands** forming the top of the valence manifold.
+   - **1 flat band**, deep and nearly dispersionless (tentatively Na 2s)
+   - **3 closely-spaced narrow bands**, also nearly dispersionless (tentatively Na 2p)
+   - **1 isolated band** at intermediate energy (tentatively Cl 3s)
+   - **3 dispersive bands** forming the top of the valence manifold (tentatively Cl 3p)
 
-   The atomic-orbital character of each group cannot be read off from the band structure alone — it will be identified using the projected DOS in Part F and confirmed with the fat-band plot in Part G.
+   The atomic-orbital character of each group cannot be read off from the band structure alone. We can guess at what they might be based on their multiplicity, but the character can be rigorously identified using the projected DOS in Part F and confirmed with the fat-band plot in Part G.
 
 3. The **VBM** is at **Γ**, where three bands are degenerate.
 
@@ -858,7 +858,7 @@ The band structure shows how eigenvalues disperse along particular paths in reci
 g(E) = \frac{1}{V_\text{BZ}} \sum_n \int_\text{BZ} \delta \left(E - E_n(\mathbf{k})\right) d\mathbf{k},
 ```
 
-and is therefore more directly comparable to spectroscopic measurements (e.g. photoemission spectra). To compute the DOS accurately you need a *uniform* sampling of the Brillouin zone — the band-structure **k**-path is not suitable.
+To compute the DOS accurately you need a *uniform* sampling of the Brillouin zone — the band-structure **k**-path is not suitable.
 
 > [!WARNING]
 >
@@ -866,7 +866,7 @@ and is therefore more directly comparable to spectroscopic measurements (e.g. ph
 >
 > `pw.x` uses `outdir/prefix.save/` both to **read** data from previous steps and to **write** new results. The NSCF calculation below must use the same `prefix` and `outdir` as the SCF (so that it can read the self-consistent charge density), but it will **overwrite** `data-file-schema.xml` and the wavefunction files with NSCF data, destroying the information needed by `projwfc.x` in Part G.
 >
-> **Before running the NSCF, copy the entire save directory:**
+> Before running the NSCF, copy the entire save directory:
 >
 > ```bash
 > cp -r tmp/NaCl.save tmp/NaCl_bands.save
@@ -877,11 +877,6 @@ and is therefore more directly comparable to spectroscopic measurements (e.g. ph
 > ```bash
 > cp -r tmp/NaCl_bands.save/* tmp/NaCl.save/
 > ```
->
-> The two key files that will be overwritten are:
->
-> - **`data-file-schema.xml`** — an XML file recording the crystal structure, pseudopotentials, k-point list, and Kohn–Sham eigenvalues. The bands run stores the k-path and band energies here; the NSCF will replace them with the dense uniform-mesh data. `projwfc.x` reads this file to know which k-points and bands to project.
-> - **`wfc*.hdf5`** (or `wfc*.dat`) — one binary file per k-point, each containing the plane-wave expansion coefficients $\{c_{n\mathbf{k}}(\mathbf{G})\}$ of all Kohn–Sham states at that point. `projwfc.x` projects these onto pseudoatomic orbitals to compute the fat-band weights. The NSCF replaces these with wavefunctions at the dense-mesh k-points, which are useless for a k-path projection.
 
 #### Step 1 — Dense NSCF calculation
 
@@ -988,8 +983,6 @@ The total DOS shows distinct groups of peaks separated by gaps. Working from low
 - **Gap** above $E_F$, consistent with the band structure in Part E.
 - **Conduction band** starting just above the gap, with initial Na 3s character.
 
-The Na 2s, Na 2p, and Cl 3s peaks are the sharpest because they come from the flattest bands: flat dispersion means $|\nabla_\mathbf{k} E_n(\mathbf{k})|$ is small, which drives the DOS to diverge (van Hove singularity). The PDOS confirms the atomic-orbital assignments directly.
-
 </details>
 
 ### Part G [OPTIONAL]: Fat bands
@@ -1009,9 +1002,9 @@ Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh f
 
 The program writes two kinds of output file.
 
-#### `NaCl_fatbands.projwfc_up` — projection weights
+#### Projection weights
 
-After several system-information header lines, it contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
+These are written to `NaCl_fatbands.projwfc_up`. After several system-information header lines, the file contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
 
 ```text
 global_idx  atom_idx  element  orbital_label  n  l  m
@@ -1019,9 +1012,9 @@ global_idx  atom_idx  element  orbital_label  n  l  m
 
 where `global_idx` is a global sequential counter, `atom_idx` is the atom number in the input, `orbital_label` is a human-readable name (e.g. `2S`, `3P`), and `n`, `l`, `m` are the principal, angular-momentum, and magnetic quantum numbers. The key line in the full header (before the blocks) reads `nwfc nk nbnd`. Each block then contains `nk × nbnd` lines of the form `ik  ibnd  weight`, where `weight` $= |\langle\phi_{\alpha,l,m}|\psi_{n\mathbf{k}}\rangle|^2$.
 
-#### `NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)` — k-resolved projected DOS
+#### K-resolved projected DOS
 
-One file per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
+These are written to `NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)`, one file per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
 
 The association between a block in `projwfc_up` and a pdos file is determined by `atom_idx`, `l`, and the sequential index of the $(n,l)$ group within that atom. For NaCl the full table is:
 
