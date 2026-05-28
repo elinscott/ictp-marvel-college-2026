@@ -679,9 +679,9 @@ We will trace the path **L → Γ → X → W → K → Γ**. Convince yourself 
 > 4. From the output panel select `Quantum ESPRESSO pw.x input`, then copy the `K_POINTS` section and paste it directly into your bands input file in place of the block in Part C.
 
 <details>
-<summary><b>Solution</b></summary>
+<summary>Solution</summary>
 
-For `ibrav = 2` the primitive reciprocal lattice vectors (in Cartesian units of $2\pi/a$) are
+For `ibrav = 2` the primitive reciprocal lattice vectors (in Cartesian units of $2π/a$) are
 
 ```math
 \mathbf{b}_1 = (-1, 1, 1), \qquad \mathbf{b}_2 = (1,-1,1), \qquad \mathbf{b}_3 = (1,1,-1).
