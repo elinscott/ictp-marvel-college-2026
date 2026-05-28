@@ -3,40 +3,17 @@
         "task": "singlepoint",
         "functional": "ki",
         "method": "dfpt",
-        "mp_correction": false,
         "gb_correction": false,
-        "eps_inf": 13.02,
         "init_orbitals": "mlwfs",
         "orbital_groups_spread_tol": 0.01,
         "pseudo_library": "PseudoDojo/0.4/LDA/SR/standard/upf",
-        "calculate_bands": true,
-        "calculate_alpha": false,
-        "alpha_guess": [[0.23, 0.23, 0.23, 0.23, 0.16, 0.16, 0.16, 0.16]]
+        "calculate_bands": true
     },
     "engine": {
-        "from_scratch": false,
+        "from_scratch": true,
         "commands": {
             "pw": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/pw.x",
-                "npool": 4
-            },
-            "pw2wannier90": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/pw2wannier90.x"
-            },
-            "projwfc": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/projwfc.x"
-            },
-            "wannier90": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/wannier90.x"
-            },
-            "kcw_wannier": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/kcw.x"
-            },
-            "kcw_screen": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/kcw.x"
-            },
-            "kcw_ham": {
-                "executable": "/home/linsco_e/code/q-e/build/bin/kcw.x"
+                "npool": 2
             }
         }
     },
@@ -68,11 +45,11 @@
             "bands_plot": true,
             "projections": [[{"fractional_site": [ 0.25, 0.25, 0.25 ], "ang_mtm": "sp3"}],
                             [{"fractional_site": [ 0.25, 0.25, 0.25 ], "ang_mtm": "sp3"}]],
-            "dis_froz_max": 10.6,
-            "dis_win_max": 16.9
+            "dis_froz_max": 9.2,
+            "dis_win_max": 20.0
         },
         "ui": {
-            "smooth_int_factor": 2
+            "smooth_int_factor": 3
         }
     },
     "plotting": {
