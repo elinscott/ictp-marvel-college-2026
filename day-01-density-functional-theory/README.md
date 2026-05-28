@@ -2,7 +2,7 @@
 
 **Tutors**: Edward Linscott & Pietro Delugas
 
-This session continues from the [preliminary exercises](../before/preliminary-exercises/), where you ran your first `Quantum ESPRESSO` calculation on bulk NaCl. Here you will run convergence tests for the cutoff energy and _**k**_-point sampling, and then use the converged parameters to compute the equilibrium lattice parameter, bulk modulus, and elastic constants.
+This session continues from the [preliminary exercise](../before/preliminary-exercise/), where you ran your first `Quantum ESPRESSO` calculation on bulk NaCl. Here you will run convergence tests for the cutoff energy and _**k**_-point sampling, and then use the converged parameters to compute the equilibrium lattice parameter, bulk modulus, and elastic constants.
 
 > **Note**
 >
@@ -30,7 +30,7 @@ We run convergence tests in order to make sure we control and understand the ext
 <details>
 <summary><b>Solution</b></summary>
 
-An observable is converged with respect to a parameter once increasing that parameter further changes the observable by less than the chosen threshold. More precisely, the observable is converged at a parameter value $x$ if for *every* $x' > x$ the observable differs from its value at $x$ by less than the threshold. It is not enough for two *consecutive* values to agree — the observable must remain within the threshold for all larger values of the parameter.
+An observable is converged with respect to a parameter once increasing that parameter further changes the observable by less than the chosen threshold. More precisely, the observable is converged at a parameter value $x$ if for *every* $x' ≥ x$ the observable differs from its value in the infinite limit by less than the threshold. It is not enough for two *consecutive* values to agree — the observable must remain within the threshold for all larger values of the parameter.
 
 </details>
 
@@ -571,24 +571,17 @@ Forces (derivatives of the total energy) are a better — though still imperfect
 
 ### Part B
 
-Compare your computed lattice parameter, bulk modulus (calculated using both the second-order approximation and the Birch–Murnaghan equation of state), and elastic constants against experimental values. Find multiple sources and cite them appropriately. Be as quantitative as possible (*e.g.* report percentage errors).
+The table below lists experimental values for NaCl reported in the literature:
 
-<details>
-<summary><b>Solution</b></summary>
+| Property | Experiment |
+| --- | --- |
+| Lattice constant (Å) | 5.64<sup>[1](#swanson1953)</sup> |
+| Bulk modulus $B$ (GPa) | 24.6<sup>[2](#whitfield1976)</sup>; 25.3<sup>[3](#kinoshita1979)</sup> |
+| $C_{11}$ (GPa) | 48.2<sup>[2](#whitfield1976)</sup>; 51.6<sup>[3](#kinoshita1979)</sup> |
+| $C_{12}$ (GPa) | 12.8<sup>[2](#whitfield1976)</sup>; 12.2<sup>[3](#kinoshita1979)</sup> |
+| $C_{44}$ (GPa) | 12.7<sup>[2](#whitfield1976)</sup>; 13.6<sup>[3](#kinoshita1979)</sup> |
 
-| Property | This work (DFT) | Experiment |
-| --- | --- | --- |
-| Lattice constant (Å) | 5.69 | 5.64<sup>[1](#swanson1953)</sup> |
-| Bulk modulus $B$ (GPa) | 26 (parabolic); 24 (Birch–Murnaghan) | 24.6<sup>[2](#whitfield1976)</sup>; 25.3<sup>[3](#kinoshita1979)</sup> |
-| $C_{11}$ (GPa) | 47 | 48.2<sup>[2](#whitfield1976)</sup>; 51.6<sup>[3](#kinoshita1979)</sup> |
-| $C_{12}$ (GPa) | 12 | 12.8<sup>[2](#whitfield1976)</sup>; 12.2<sup>[3](#kinoshita1979)</sup> |
-| $C_{44}$ (GPa) | 12 | 12.7<sup>[2](#whitfield1976)</sup>; 13.6<sup>[3](#kinoshita1979)</sup> |
-
-For the bulk modulus, the Birch–Murnaghan value should agree with experiment better than the parabolic fit, especially if the parabolic fit is shaky.
-
-</details>
-
-### Part C
+Compare your computed lattice parameter, bulk modulus (calculated using both the second-order approximation and the Birch–Murnaghan equation of state), and elastic constants against these experimental values.
 
 Do we expect semi-local DFT to be able to predict these properties with high accuracy? Why/why not?
 
