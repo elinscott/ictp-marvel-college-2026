@@ -718,13 +718,22 @@ Post-process the output with `bands.x`. Create an input file:
 /
 ```
 
-and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV relative to the Fermi level — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`.
+and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV (absolute, **not** shifted to the Fermi level) — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`. To set $E_F = 0$, use the highest occupied level reported by `pw.x` in the SCF output (look for the line `highest occupied, lowest unoccupied level (eV)` and take the first value).
 
 Plot the band structure. A minimal Python script:
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+
+# --- Read highest occupied level from SCF output ---
+# pw.x prints: "highest occupied, lowest unoccupied level (eV):  X.XXXX  X.XXXX"
+efermi = None
+with open('scf.out') as f:   # replace with your SCF output file name
+    for line in f:
+        if 'highest occupied' in line:
+            efermi = float(line.split(':')[1].split()[0])
+            break
 
 # --- Parse the .gnu file ---
 bands, segment = [], []
@@ -733,7 +742,7 @@ with open('NaCl_bands.dat.gnu') as f:
         line = line.strip()
         if line:
             k, e = map(float, line.split())
-            segment.append((k, e))
+            segment.append((k, e - efermi))
         else:
             if segment:
                 bands.append(np.array(segment))
@@ -746,7 +755,7 @@ fig, ax = plt.subplots(figsize=(5, 7))
 for band in bands:
     ax.plot(band[:, 0], band[:, 1], 'b-', lw=0.8)
 
-ax.axhline(0, color='k', lw=0.5, ls='--')  # Fermi level / VBM
+ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
 # Add vertical lines and labels at high-symmetry points
 # (read their k-coordinates from bands_pp.out)
@@ -755,7 +764,7 @@ ax.axhline(0, color='k', lw=0.5, ls='--')  # Fermi level / VBM
 # ax.set_xticks([k_L, k_G, k_X, k_W, k_K, k_G2])
 # ax.set_xticklabels(['L', r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$'])
 
-ax.set_ylabel('Energy (eV)')
+ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(-20, 15)    # adjust to your output
 ax.set_xlim(bands[0][0, 0], bands[0][-1, 0])
 plt.tight_layout()
@@ -954,7 +963,7 @@ nk  nbnd  nwfc                           ← header
   ...
 ```
 
-The Fermi energy (in eV) is printed in the `projwfc.x` stdout — use it to align energies with your band plot.
+To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Part D.
 
 Below is a complete example that highlights the **Cl 3p** contribution. Run it, examine which bands light up, and then add the **Na 2s** and **Na 2p** projections to the same axes. (Optionally also add Cl 3s.)
 
@@ -989,8 +998,13 @@ k_path = np.zeros(nk)
 for ik in range(1, nk):
     k_path[ik] = k_path[ik - 1] + np.linalg.norm(kcoords[ik] - kcoords[ik - 1])
 
-# Set Fermi level (read from projwfc.x stdout or use VBM of band 8)
-e_fermi = energies[:, 7].max()   # band index 7 = 8th band (last occupied)
+# Read highest occupied level from SCF output (same file used in Part D)
+e_fermi = None
+with open('scf.out') as f:   # replace with your SCF output file name
+    for line in f:
+        if 'highest occupied' in line:
+            e_fermi = float(line.split(':')[1].split()[0])
+            break
 energies -= e_fermi
 
 # --- Print wfc table so you can identify which indices to use ---
