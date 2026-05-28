@@ -789,11 +789,10 @@ import matplotlib.pyplot as plt
 from python_utils import read_efermi, read_bands_gnu, get_high_symm_points
 
 efermi = read_efermi('scf.out')   # replace with your SCF output filename
-bands = read_bands_gnu('NaCl_bands.dat.gnu')
+k_path, energies = read_bands_gnu('NaCl_bands.dat.gnu')
 
 fig, ax = plt.subplots(figsize=(5, 7))
-for band in bands:
-    ax.plot(band[:, 0], band[:, 1] - efermi, 'b-', lw=0.8)
+ax.plot(k_path, energies - efermi, 'b-', lw=0.8)
 
 ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
@@ -804,7 +803,7 @@ ax.set_xticks(ks)
 ax.set_xticklabels(lbls)
 
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_xlim(bands[0][0, 0], bands[0][-1, 0])
+ax.set_xlim(k_path[0], k_path[-1])
 plt.tight_layout()
 plt.savefig('NaCl_bands.png', dpi=150)
 plt.show()
@@ -1057,8 +1056,7 @@ from python_utils import read_efermi, read_bands_gnu, get_high_symm_points, load
 
 efermi = read_efermi('scf.out')        # replace with your SCF output filename
 
-# k-path coordinates from bands.dat.gnu (first band only)
-k_path = read_bands_gnu('NaCl_bands.dat.gnu')[0][:, 0]
+k_path, _ = read_bands_gnu('NaCl_bands.dat.gnu')
 nk = len(k_path)
 
 # --- Cl 3p ---

@@ -35,20 +35,20 @@ def read_efermi(scf_out):
 
 
 def read_bands_gnu(gnu_file):
-    """Return a list of (nk, 2) arrays (k, E in eV) from a bands.x .gnu output file, one per band."""
-    bands, segment = [], []
+    """Parse a bands.x .gnu output. Returns (k_path, energies) with k_path.shape == (nk,) and energies.shape == (nk, nbnd)."""
+    segments, current = [], []
     with open(gnu_file) as f:
         for line in f:
             line = line.strip()
             if line:
-                segment.append([float(t) for t in line.split()])
-            else:
-                if segment:
-                    bands.append(np.array(segment))
-                    segment = []
-    if segment:
-        bands.append(np.array(segment))
-    return bands
+                current.append([float(t) for t in line.split()])
+            elif current:
+                segments.append(current)
+                current = []
+    if current:
+        segments.append(current)
+    data = np.array(segments)            # shape (nbnd, nk, 2)
+    return data[0, :, 0], data[:, :, 1].T
 
 
 def load_kdos(pdos_file, nk):
