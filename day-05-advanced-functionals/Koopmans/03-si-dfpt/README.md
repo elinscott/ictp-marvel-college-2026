@@ -150,7 +150,9 @@ Look closely at the conduction band minimum (CBM) along the Γ–X segment in `s
 
 We have a trick to overcome this issue. The KI Hamiltonian splits into a DFT part and a small, slowly-varying Koopmans correction, so the interpolated Hamiltonian can be written as
 
-$$h^\mathrm{KI}_{mn}(\mathbf{k}) = \sum_{\mathbf{R}'} e^{i\mathbf{k}\cdot\mathbf{R}'}\, h^\mathrm{DFT}_{mn}(\mathbf{R}') + \sum_{\mathbf{R}} e^{i\mathbf{k}\cdot\mathbf{R}}\, v^\mathrm{KI}_{mn}(\mathbf{R}),$$
+```math
+h^\mathrm{KI}_{mn}(\mathbf{k}) = \sum_{\mathbf{R}'} e^{i\mathbf{k}\cdot\mathbf{R}'} h^\mathrm{DFT}_{mn}(\mathbf{R}') + \sum_{\mathbf{R}} e^{i\mathbf{k}\cdot\mathbf{R}} v^\mathrm{KI}_{mn}(\mathbf{R})
+```
 
 In principle, there is no need for the two parts of the Hamiltonian to be evaluated on the same real-space mesh (or, equivalently the same _**q**_-point grid). Indeed, because the Koopmans correction is more slowly-varying, it can be evaluated on a coarser mesh. This is controlled by the `smooth_int_factor` keyword, which we were already using:
 
