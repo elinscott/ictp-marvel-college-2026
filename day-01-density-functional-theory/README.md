@@ -649,13 +649,15 @@ Why can we not simply read off the band structure from the SCF calculation carri
 <details>
 <summary><b>Solution</b></summary>
 
-The SCF calculation evaluates Kohn–Sham eigenvalues only at the **k**-points of the Monkhorst–Pack grid used to converge the charge density. Those points are chosen for their efficiency in sampling Brillouin-zone integrals and do not lie on the high-symmetry paths conventionally used for plotting band structures. Moreover, for an insulator the ground-state charge density does not depend on unoccupied eigenvalues, so the self-consistent potential is already converged after the SCF step; the Kohn–Sham eigenvalues can then be computed at any new set of **k**-points without further self-consistency iterations.
+The SCF calculation evaluates Kohn–Sham eigenvalues only at the **k**-points of the Monkhorst–Pack grid used to converge the charge density. Those points are chosen for their efficiency in sampling Brillouin-zone integrals and do not lie on the high-symmetry paths that provide a detailed description of the full _**k**_-dependent band structure.
+
+That is not to say the SCF calculation can't help us; for an insulator the ground-state charge density does not depend on unoccupied eigenvalues, so the self-consistent potential is already converged after the SCF step, and the Kohn–Sham eigenvalues can be computed at any new set of **k**-points without further self-consistency iterations.
 
 </details>
 
 ### Part B
 
-NaCl crystallises in the rocksalt structure with an FCC Bravais lattice. The FCC first Brillouin zone is a **truncated octahedron**. The table below lists the conventional high-symmetry points:
+NaCl has a rocksalt structure with an FCC Bravais lattice. The FCC first Brillouin zone is a truncated octahedron. The table below lists its conventional high-symmetry points:
 
 | Label | Cartesian ($2\pi/a$) | Crystal coordinates (`ibrav = 2`) |
 |:---:|:---:|:---:|
@@ -667,23 +669,23 @@ NaCl crystallises in the rocksalt structure with an FCC Bravais lattice. The FCC
 
 We will trace the path **L → Γ → X → W → K → Γ**. Convince yourself that the crystal-coordinate columns are correct by expressing each Cartesian vector as a linear combination of the FCC reciprocal primitive vectors for `ibrav = 2`.
 
-> **Alternative: use SeekPath to determine the path automatically**
+> [!NOTE]
 >
 > Instead of setting the k-path by hand, you can use the [SeekPath](https://www.materialscloud.org/work/tools/seekpath) tool on Materials Cloud:
 >
 > 1. Go to [seekpath.materialscloud.org](https://www.materialscloud.org/work/tools/seekpath) and upload `NaCl_primitive.scf.in`.
-> 2. Click **Calculate my structure**.
+> 2. Click `Calculate my structure`.
 > 3. Examine the shape of the FCC Brillouin zone and observe how the suggested path surrounds the irreducible wedge. Compare the high-symmetry point coordinates shown in **scaled (crystal) units** with those in **Cartesian units (1/Å)** and relate them to the table above.
-> 4. From the output panel select **Quantum ESPRESSO pw.x input**, then copy the `K_POINTS` section and paste it directly into your bands input file in place of the block in Part C.
+> 4. From the output panel select `Quantum ESPRESSO pw.x input`, then copy the `K_POINTS` section and paste it directly into your bands input file in place of the block in Part C.
 
 <details>
 <summary><b>Solution</b></summary>
 
 For `ibrav = 2` the primitive reciprocal lattice vectors (in Cartesian units of $2\pi/a$) are
 
-$$
+```math
 \mathbf{b}_1 = (-1, 1, 1), \qquad \mathbf{b}_2 = (1,-1,1), \qquad \mathbf{b}_3 = (1,1,-1).
-$$
+```
 
 A **k**-point with crystal coordinates $(k_1, k_2, k_3)$ corresponds to the Cartesian vector $k_1\,\mathbf{b}_1 + k_2\,\mathbf{b}_2 + k_3\,\mathbf{b}_3$. Verify X as an example:
 
