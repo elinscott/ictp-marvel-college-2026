@@ -810,21 +810,17 @@ for band in bands:
 ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
 # High-symmetry points: fill in k-coordinates from bands_pp.out
-from collections import deque
-hs_points = deque([
+hs_points = [
     (k_L,  'L'),
     (k_G,  r'$\Gamma$'),
     (k_X,  'X'),
     (k_W,  'W'),
     (k_K,  'K'),
     (k_G2, r'$\Gamma$'),
-])
-ks, lbls = [], []
-while hs_points:
-    k, lbl = hs_points.popleft()
+]
+ks, lbls = zip(*hs_points)
+for k in ks:
     ax.axvline(k, color='k', lw=0.5)
-    ks.append(k)
-    lbls.append(lbl)
 ax.set_xticks(ks)
 ax.set_xticklabels(lbls)
 
@@ -1073,7 +1069,6 @@ Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import deque
 
 # --- Fermi level from SCF output ---
 efermi = None
@@ -1130,19 +1125,17 @@ ax.set_ylim(-8, 5)
 ax.set_xlim(k_path[0], k_path[-1])
 
 # High-symmetry point markers (fill in from bands_pp.out, as in Part D)
-hs_points = deque([
+hs_points = [
     (k_L,  'L'),
     (k_G,  r'$\Gamma$'),
     (k_X,  'X'),
     (k_W,  'W'),
     (k_K,  'K'),
     (k_G2, r'$\Gamma$'),
-])
-ks, lbls = [], []
-while hs_points:
-    k, lbl = hs_points.popleft()
+]
+ks, lbls = zip(*hs_points)
+for k in ks:
     ax.axvline(k, color='k', lw=0.5)
-    ks.append(k); lbls.append(lbl)
 ax.set_xticks(ks)
 ax.set_xticklabels(lbls)
 
