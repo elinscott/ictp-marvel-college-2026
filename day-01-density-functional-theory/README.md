@@ -630,6 +630,15 @@ NaCl crystallises in the rocksalt structure with an FCC Bravais lattice. The FCC
 
 We will trace the path **L → Γ → X → W → K → Γ**. Convince yourself that the crystal-coordinate columns are correct by expressing each Cartesian vector as a linear combination of the FCC reciprocal primitive vectors for `ibrav = 2`.
 
+> **Alternative: use SeekPath to determine the path automatically**
+>
+> Instead of setting the k-path by hand, you can use the [SeekPath](https://www.materialscloud.org/work/tools/seekpath) tool on Materials Cloud:
+>
+> 1. Go to [seekpath.materialscloud.org](https://www.materialscloud.org/work/tools/seekpath) and upload `NaCl_primitive.scf.in`.
+> 2. Click **Calculate my structure**.
+> 3. Examine the shape of the FCC Brillouin zone and observe how the suggested path surrounds the irreducible wedge. Compare the high-symmetry point coordinates shown in **scaled (crystal) units** with those in **Cartesian units (1/Å)** and relate them to the table above.
+> 4. From the output panel select **Quantum ESPRESSO pw.x input**, then copy the `K_POINTS` section and paste it directly into your bands input file in place of the block in Part C.
+
 <details>
 <summary><b>Solution</b></summary>
 
