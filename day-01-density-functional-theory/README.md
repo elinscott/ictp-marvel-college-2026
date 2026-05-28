@@ -757,12 +757,24 @@ for band in bands:
 
 ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
-# Add vertical lines and labels at high-symmetry points
-# (read their k-coordinates from bands_pp.out)
-# ax.axvline(k_L,  color='k', lw=0.5)
-# ...
-# ax.set_xticks([k_L, k_G, k_X, k_W, k_K, k_G2])
-# ax.set_xticklabels(['L', r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$'])
+# High-symmetry points: fill in k-coordinates from bands_pp.out
+from collections import deque
+hs_points = deque([
+    (k_L,  'L'),
+    (k_G,  r'$\Gamma$'),
+    (k_X,  'X'),
+    (k_W,  'W'),
+    (k_K,  'K'),
+    (k_G2, r'$\Gamma$'),
+])
+ks, lbls = [], []
+while hs_points:
+    k, lbl = hs_points.popleft()
+    ax.axvline(k, color='k', lw=0.5)
+    ks.append(k)
+    lbls.append(lbl)
+ax.set_xticks(ks)
+ax.set_xticklabels(lbls)
 
 ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(-20, 15)    # adjust to your output
@@ -862,7 +874,7 @@ K_POINTS automatic
 /
 ```
 
-Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energy (eV), DOS (states/eV/cell), and integrated DOS (states/cell). The Fermi energy is printed in `dos.out`; subtract it to set $E_F = 0$.
+Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energy (eV), DOS (states/eV/cell), and integrated DOS (states/cell). Its first line is a comment header that also contains the Fermi energy, e.g. `#  E (eV)   dos(E)     Int dos(E) EFermi =    1.188 eV`.
 
 **Step 3 — Projected DOS with `projwfc.x`.** For a richer picture, compute the DOS projected onto atomic orbitals:
 
@@ -884,13 +896,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import glob
 
-# Read Fermi energy from dos.out
-efermi = None
-with open('dos.out') as f:
-    for line in f:
-        if 'EFermi' in line or 'Fermi' in line:
-            efermi = float(line.split()[-2])  # adjust index if needed
-            break
+# Read Fermi energy from the header line of NaCl_dos.dat:
+# "#  E (eV)   dos(E)     Int dos(E) EFermi =    X.XXX eV"
+with open('NaCl_dos.dat') as f:
+    header = f.readline()
+efermi = float(header.split('EFermi =')[1].split()[0])
 
 fig, ax = plt.subplots(figsize=(7, 4))
 
