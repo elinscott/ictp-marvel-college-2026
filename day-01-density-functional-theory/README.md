@@ -228,11 +228,11 @@ Mathematically, what is the relationship between atomic forces and total energie
 <details>
 <summary><b>Solution</b></summary>
 
-The force on atom $I$ is minus the gradient of the total energy with respect to that atom's position:
+The force on atom $`I`$ is minus the gradient of the total energy with respect to that atom's position:
 
-$$
+$`
 \mathbf{F}_I = -\nabla_{\mathbf{R}_I} E.
-$$
+`$
 
 </details>
 
@@ -313,9 +313,11 @@ Using the fact that pressure can be written as a derivative of energy with respe
 <details>
 <summary><b>Solution</b></summary>
 
-Pressure is $P = -\partial E/\partial V$, so
+Pressure is $`P = -\partial E/\partial V`$, so
 
-$$ B = -V_0 \left.\frac{\partial P}{\partial V}\right|_{V_0} = V_0 \left.\frac{\partial^2 E}{\partial V^2}\right|_{V_0}. $$
+$`
+B = -V_0 \left.\frac{\partial P}{\partial V}\right|_{V_0} = V_0 \left.\frac{\partial^2 E}{\partial V^2}\right|_{V_0}.
+`$
 
 </details>
 
@@ -701,9 +703,11 @@ The remaining points follow analogously.
 
 A band-structure calculation requires two steps.
 
-**Step 1 — SCF.** Run `pw.x` with `calculation = 'scf'` using the primitive cell (`ibrav = 2`), the converged `ecutwfc` and **k**-point grid from Problems 1–4, and the equilibrium lattice parameter from Problem 5. If you have kept the `outdir` directory from an earlier primitive-cell SCF with the correct lattice parameter, you may skip this step.
+#### Step 1 — SCF
+Run `pw.x` with `calculation = 'scf'` using the primitive cell (`ibrav = 2`), the converged `ecutwfc` and **k**-point grid from Problems 1–4, and the equilibrium lattice parameter from Problem 5. If you have kept the `outdir` directory from an earlier primitive-cell SCF with the correct lattice parameter, you may skip this step.
 
-**Step 2 — Bands.** Create a new input file identical to the SCF input except for the following changes:
+#### Step 2 — Bands
+Create a new input file identical to the SCF input except for the following changes:
 
 - Set `calculation = 'bands'` in `&CONTROL`.
 - Set `nbnd` to a value larger than the number of occupied bands in `&SYSTEM`, so that conduction bands are also computed.
@@ -722,7 +726,7 @@ K_POINTS crystal_b
 
 Keep `outdir` and `prefix` identical to the SCF step so that `pw.x` can find the self-consistent potential.
 
-> **Note**
+> [!NOTE]
 >
 > How many valence electrons does each pseudopotential contribute? Check the `z_valence` tag inside the UPF files (in the `pseudopotentials/` directory). The number of occupied bands equals half the total number of valence electrons per primitive cell.
 
@@ -881,7 +885,9 @@ g(E) = \frac{1}{V_\text{BZ}} \sum_n \int_\text{BZ} \delta \left(E - E_n(\mathbf{
 
 and is therefore more directly comparable to spectroscopic measurements (e.g. photoemission spectra). To compute the DOS accurately you need a *uniform* sampling of the Brillouin zone — the band-structure **k**-path is not suitable.
 
-> **Warning — back up the bands save directory before proceeding**
+> [!WARNING]
+>
+> **Back up the bands save directory before proceeding.**
 >
 > `pw.x` uses `outdir/prefix.save/` both to **read** data from previous steps and to **write** new results. The NSCF calculation below must use the same `prefix` and `outdir` as the SCF (so that it can read the self-consistent charge density), but it will **overwrite** `data-file-schema.xml` and the wavefunction files with NSCF data, destroying the information needed by `projwfc.x` in Part G.
 >
@@ -902,7 +908,9 @@ and is therefore more directly comparable to spectroscopic measurements (e.g. ph
 > - **`data-file-schema.xml`** — an XML file recording the crystal structure, pseudopotentials, k-point list, and Kohn–Sham eigenvalues. The bands run stores the k-path and band energies here; the NSCF will replace them with the dense uniform-mesh data. `projwfc.x` reads this file to know which k-points and bands to project.
 > - **`wfc*.hdf5`** (or `wfc*.dat`) — one binary file per k-point, each containing the plane-wave expansion coefficients $\{c_{n\mathbf{k}}(\mathbf{G})\}$ of all Kohn–Sham states at that point. `projwfc.x` projects these onto pseudoatomic orbitals to compute the fat-band weights. The NSCF replaces these with wavefunctions at the dense-mesh k-points, which are useless for a k-path projection.
 
-**Step 1 — Dense NSCF calculation.** Run `pw.x` with `calculation = 'nscf'`, using the same `prefix` and `outdir` as your SCF calculation. For an insulator, the **tetrahedron method** avoids artificial broadening and gives the most accurate DOS. Use a dense, uniform **k**-point grid (e.g. 12×12×12):
+#### Step 1 — Dense NSCF calculation
+
+Run `pw.x` with `calculation = 'nscf'`, using the same `prefix` and `outdir` as your SCF calculation. For an insulator, the **tetrahedron method** avoids artificial broadening and gives the most accurate DOS. Use a dense, uniform **k**-point grid (e.g. 12×12×12):
 
 ```text
 &SYSTEM
@@ -914,11 +922,13 @@ K_POINTS automatic
 12 12 12  0 0 0
 ```
 
-> **Note**
+> [!NOTE]
 >
 > If `occupations = 'tetrahedra_opt'` causes convergence issues, replace it with Gaussian smearing (`occupations = 'smearing'`, `smearing = 'gaussian'`, `degauss = 0.005`). The resulting broadening of 0.005 Ry ≈ 0.07 eV is far smaller than the band gap and will not obscure it.
 
-**Step 2 — Total DOS with `dos.x`.** Create an input file:
+#### Step 2 — Total DOS with `dos.x`
+
+Create an input file:
 
 ```text
 &DOS
@@ -931,7 +941,9 @@ K_POINTS automatic
 
 Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energy (eV), DOS (states/eV/cell), and integrated DOS (states/cell). Its first line is a comment header that also contains the Fermi energy, e.g. `#  E (eV)   dos(E)     Int dos(E) EFermi =    1.188 eV`.
 
-**Step 3 — Projected DOS with `projwfc.x`.** For a richer picture, compute the DOS projected onto atomic orbitals:
+#### Step 3 — Projected DOS with `projwfc.x`
+
+For a richer picture, compute the DOS projected onto atomic orbitals:
 
 ```text
 &PROJWFC
@@ -944,7 +956,9 @@ Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energ
 
 Run `projwfc.x < projwfc.in > projwfc.out`. The program writes one file per angular-momentum channel per atom (e.g. `NaCl_pdos.pdos_atm#1(Na)_wfc#1(s)`, `NaCl_pdos.pdos_atm#2(Cl)_wfc#2(p)`, ...). Each file contains two columns: energy and the local DOS for that channel (sum over $m_l$), followed by individual $m_l$ components.
 
-**Step 4 — Plot.** A minimal Python script that overlays the total DOS and the projected contributions:
+#### Step 4 — Plot
+
+A minimal Python script that overlays the total DOS and the projected contributions:
 
 ```python
 import numpy as np
@@ -1052,7 +1066,7 @@ To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as 
 
 Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **Na 2p** on the same axes using different colour maps.
 
-> **Note**
+> [!NOTE]
 >
 > Each orbital has weight in a different energy region, so a single energy window may not show all characters well. When focusing on a specific orbital, tighten the window: the energy mask is set on the line starting `emask = ...` and the axis limits on `ax.set_ylim(...)`. For example, Na 2p character sits around −20 to −15 eV and would require widening both lines accordingly.
 
