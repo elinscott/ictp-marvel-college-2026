@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mpirun -n 2 pw.x -npool 2 -in  scf_twochem.in  > scf_twochem.out
+mpirun -n 2 pw.x -npool 2 -in  nscf_twochem.in  > nscf_twochem.out
+mpirun -n 2 bands.x -npool 2 -in bands.in > bands.out

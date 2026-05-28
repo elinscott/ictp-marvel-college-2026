@@ -1,0 +1,25 @@
+ &control
+    calculation = 'bands'
+    pseudo_dir='../Pseudo/',
+ /
+ &system
+    ibrav=2, celldm(1) =10.20124,
+    nat=2, ntyp=1,
+    ecutwfc=30.0
+    occupations="fixed",
+    nbnd=8,
+ /
+ &electrons
+ /
+ATOMIC_SPECIES
+ Si  28.086  Si.pz-vbc.UPF
+ATOMIC_POSITIONS {alat}
+ Si 0.00 0.00 0.00
+ Si 0.25 0.25 0.25
+K_POINTS (crystal_b)
+5                        ! Number of high-symmetry points in the path
+ 0.0  0.0  0.0  20       ! Gamma point, 20 intervals to next point
+ 0.0  0.5  0.5  20       ! X point, 20 intervals to next point
+ 0.25 0.5  0.75 20       ! W point, 20 intervals to next point
+ 0.375 0.375 0.75 20     ! K point, 20 intervals to next point
+ 0.0  0.0  0.0  1        ! Gamma point (end of path)

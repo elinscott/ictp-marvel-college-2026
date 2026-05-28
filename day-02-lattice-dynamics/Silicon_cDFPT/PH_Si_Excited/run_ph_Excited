@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mpirun -n 2 pw.x -npool 2 -in  scf_twochem.in  > scf_twochem.out
+mpirun -n 2 ph.x -npool 2 -in  ph_twochem.in  > ph_twochem.out

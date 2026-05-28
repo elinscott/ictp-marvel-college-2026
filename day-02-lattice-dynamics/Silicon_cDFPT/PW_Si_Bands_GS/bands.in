@@ -1,0 +1,4 @@
+&BANDS
+    filband = 'si_bands.dat' ! The primary output file containing the band data
+    lsym = .false.          ! Set to true only if you need to analyze wave function symmetry
+/

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mpirun -n 2 pw.x -npool 2 -in  vc-relax_twochem.in  > vc-relax_twochem.out
+
