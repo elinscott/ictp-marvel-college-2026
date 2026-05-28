@@ -982,7 +982,7 @@ Identify the groups of peaks in the DOS and relate them to the bands you saw in 
 
 The total DOS shows distinct groups of peaks separated by gaps. Working from low to high energy (and matching them to the four band groups identified in Part E):
 
-- **Na 2s**: deepest semicore, far below the rest. The PDOS confirms this is the lowest flat band of Part E.
+- **Na 2s**: a very deep semicore peak that sits below the lower edge of the plotted energy window (extend `set_xlim` if you want to see it). It corresponds to the lowest, flattest band of Part E.
 - **Na 2p**: a sharp peak from the three-fold Na 2p manifold; nearly dispersionless across the BZ (the 2p semicore orbital barely overlaps with neighbours), so many states pile up at almost the same energy — a classic **van Hove singularity**.
 - **Cl 3s**: a sharp peak from the isolated, narrow band.
 - **Cl 3p (valence band)**: three broader, strongly overlapping peaks forming the top of the valence manifold. The Cl 3p orbitals have larger spatial extent and stronger inter-site hopping than the Na semicore states, leading to greater bandwidth and smoother features.
