@@ -808,9 +808,9 @@ Analyse your band structure.
 
 The band structure shows how eigenvalues disperse along particular paths in reciprocal space. The **density of states** (DOS) $g(E)$ instead sums contributions from *all* **k**-points,
 
-$$
-g(E) = \frac{1}{V_\text{BZ}} \sum_n \int_\text{BZ} \delta\!\left(E - E_n(\mathbf{k})\right) d\mathbf{k},
-$$
+```math
+g(E) = \frac{1}{V_\text{BZ}} \sum_n \int_\text{BZ} \delta \left(E - E_n(\mathbf{k})\right) d\mathbf{k},
+```
 
 and is therefore more directly comparable to spectroscopic measurements (e.g. photoemission spectra). To compute the DOS accurately you need a *uniform* sampling of the Brillouin zone — the band-structure **k**-path is not suitable.
 
