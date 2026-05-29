@@ -803,7 +803,7 @@ ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
 # x-positions of the high-symmetry points come straight from bands.x;
 # the labels are the path vertices you chose in Part C, in order
-labels = ['L', r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$']
+labels = ['L', 'Γ', 'X', 'W', 'K', 'Γ']
 xticks = bands.outputs.high_symmetry_distances
 for x in xticks:
     ax.axvline(x, color='k', lw=0.5)
@@ -957,7 +957,7 @@ ax.plot(energy, dos.outputs.dos, color='k', lw=0.8)
 proj = ProjwfcOutput.from_files(pdos_files=glob('NaCl_pdos.pdos_atm*'))
 for rec in proj.outputs.pdos:
     ax.plot(rec['energies'] - efermi, rec['ldos'],
-            lw=0.8, label=f"{rec['element']} {rec['l_label']}")
+            lw=0.8, label=f"{rec['element']} {rec['l_label']} (wfc {rec['wfc']})")
 
 ax.axvline(0, color='k', lw=0.5, ls='--')
 ax.set_xlabel('$E - E_F$ (eV)')
