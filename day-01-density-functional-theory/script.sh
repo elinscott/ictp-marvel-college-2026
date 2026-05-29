@@ -71,9 +71,9 @@ EOF
 
    # Run the calculation
    # '<' feeds the input file to pw.x (stdin redirection)
-   # '>' sends the output to a file (stdout redirection)
-   echo "Running: $pw_launch < $input > $output"
-   $pw_launch < "$input" > "$output"
+   # '&>' sends the output to a file (stdout and stderr redirection)
+   echo "Running: $pw_launch < $input &> $output"
+   $pw_launch < "$input" &> "$output"
 
 done
 
