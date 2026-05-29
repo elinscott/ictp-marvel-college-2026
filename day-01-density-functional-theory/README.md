@@ -1114,6 +1114,82 @@ The sharp separation of atomic-orbital character between bands confirms the stro
 
 </details>
 
+### Part G (alternative) [OPTIONAL]: Fat bands from projection weights
+
+The intensity map above sidesteps the fact that the k-resolved pdos files give a *density* $\text{ldos}(\mathbf{k}, E)$ rather than a weight per band. A more literal fat-band plot instead draws each band $E_n(\mathbf{k})$ — taken directly from the `bands.x` output — as a line whose **opacity is proportional to the projection weight** onto a chosen orbital. This shows the band dispersion explicitly instead of as a blurred intensity, at the price of needing the per-band weights.
+
+Those weights are exactly what `projwfc.x` writes to `NaCl_fatbands.projwfc_up` (the `filproj` output): for each atomic wavefunction, a block of `ik ibnd weight` lines. `qe-tools` does not parse this file, so we read it with a small helper, selecting one `(atom, wfc)` channel and summing the weight over its $m$ components. The band energies and high-symmetry points come from `BandsOutput`, just as in Part D.
+
+```python
+import re
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+from qe_tools.outputs import PwOutput, BandsOutput
+
+efermi = PwOutput.from_files(stdout='scf.out').outputs.highest_occupied_level  # replace with your SCF output filename
+
+bands    = BandsOutput.from_files(gnu='NaCl_bands.dat.gnu', stdout='bands_pp.out')
+k_path   = bands.outputs.k_path_distances
+energies = bands.outputs.eigenvalues   # (nk, nbnd), in eV
+
+# qe-tools does not parse the filproj weights file, so read it by hand. Blocks are
+# labelled "global_idx atom element orbital n l m", each followed by nk*nbnd lines
+# "ik ibnd weight"; pick one (atom, wfc) channel and sum the weight over its m values.
+def load_weights(filename, atom, wfc):
+    label = re.compile(r'\s*\d+\s+(\d+)\s+[A-Za-z]\S*\s+\S+\s+(\d+)\s+\d+\s+\d+\s*$')
+    selected, rows = False, []
+    with open(filename) as f:
+        for line in f:
+            m = label.match(line)
+            if m:
+                selected = (int(m.group(1)) == atom and int(m.group(2)) == wfc)
+            elif selected and len(line.split()) == 3:
+                ik, ibnd, w = line.split()
+                rows.append((int(ik), int(ibnd), float(w)))
+    ik, ibnd, w = (np.array(c) for c in zip(*rows))
+    weight = np.zeros((ik.max(), ibnd.max()))
+    np.add.at(weight, (ik - 1, ibnd - 1), w)   # sum over m
+    return weight
+
+# --- Cl 3p (atom 2, wfc 2) ---
+weight = load_weights('NaCl_fatbands.projwfc_up', atom=2, wfc=2)
+y = energies - efermi
+
+fig, ax = plt.subplots(figsize=(5, 7))
+
+# faint bare bands so that zero-weight bands stay visible
+ax.plot(k_path, y, color='0.85', lw=0.5, zorder=0)
+
+# overlay each band as a line whose opacity tracks the projection weight
+wmax = weight.max()
+for n in range(y.shape[1]):
+    points   = np.column_stack([k_path, y[:, n]])
+    segments = np.stack([points[:-1], points[1:]], axis=1)
+    rgba = np.zeros((len(segments), 4))
+    rgba[:, 0] = 0.85                                                  # red
+    rgba[:, 3] = np.clip(0.5 * (weight[:-1, n] + weight[1:, n]) / wmax, 0, 1)  # alpha
+    ax.add_collection(LineCollection(segments, colors=rgba, linewidths=3))
+
+ax.axhline(0, color='k', lw=0.5, ls='--')
+ax.set_ylabel('$E - E_F$ (eV)')
+ax.set_ylim(-3, 1)
+ax.set_xlim(k_path[0], k_path[-1])
+
+labels = ['L', 'Γ', 'X', 'W', 'K', 'Γ']
+xticks = bands.outputs.high_symmetry_distances
+for x in xticks:
+    ax.axvline(x, color='k', lw=0.5)
+ax.set_xticks(xticks)
+ax.set_xticklabels(labels)
+
+plt.tight_layout()
+plt.savefig('NaCl_fatbands_Cl_p_lines.png', dpi=150)
+plt.show()
+```
+
+As before, extend the script to overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) in different colours, and widen `set_ylim` to reach their deeper energies. The physical conclusions are the same as in Part G above — only the visualisation differs.
+
 ---
 
 ## References
@@ -1123,9 +1199,3 @@ The sharp separation of atomic-orbital character between bands confirms the stro
 3. <a id="kinoshita1979"></a>H. Kinoshita, N. Hamaya, and H. Fujisawa, "Elastic properties of single-crystal NaCl under high pressures to 80 kbar", *Journal of Physics of the Earth* **27**, 337–350 (1979).
 4. <a id="isaacs2018"></a>E. B. Isaacs and C. Wolverton, "Performance of the strongly constrained and appropriately normed density functional for solid-state materials", *Physical Review Materials* **2**, 063801 (2018). [doi:10.1103/PhysRevMaterials.2.063801](https://doi.org/10.1103/PhysRevMaterials.2.063801)
 5. <a id="baldini1970"></a>G. Baldini and B. Bosacchi, "Optical Properties of Na and Li Halide Crystals at 55 °K", *Physica Status Solidi (b)* **38**(1), 325–334 (1970). [doi:10.1002/pssb.19700380132](https://doi.org/10.1002/pssb.19700380132)
-
----
-
-# TODO
-- [ ] band structures
-- [ ] stresses from input files
