@@ -533,7 +533,7 @@ Applying the orthorhombic strain to the cubic lattice vectors gives $|a'_1| = a(
 ```bash
 celldm1=$(echo "$a * (1 + $x)" | bc -l)
 celldm2=$(echo "(1 - $x) / (1 + $x)" | bc -l)
-celldm3=$(echo "1 / ((1 - $x^2) * (1 + $x))" | bc -l)
+celldm3=$(echo "1 / ((1 - ($x)^2) * (1 + $x))" | bc -l)
 ```
 
 For each strain $x$, build the strained lattice vectors, run a `relax` calculation, and plot $\Delta E(x)$. Fitting $\Delta E = V_0 (C_{11} - C_{12})\, x^2$ gives $C_{11} - C_{12}$; combining this with $B = \tfrac{1}{3}(C_{11} + 2 C_{12})$ from Problem 6 then yields $C_{11} \approx 47$ GPa and $C_{12} \approx 12$ GPa, close to the experimental values.
