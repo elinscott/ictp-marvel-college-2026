@@ -102,10 +102,18 @@ In ΔSCF the cost of one screening parameter is a supercell SCF, which scales as
 
 ### Part B
 
-By construction, the Koopmans correction depends on the screening parameter $\alpha_i$ of each orbital — orbitals with $\alpha_i$ close to 1 are corrected strongly, while orbitals with $\alpha_i$ close to 0 are barely shifted. Inspect the screening parameters that were computed in `si_ki.md`. How do they compare? What does this tell you about how strongly the electrons in a covalent semiconductor like silicon screen?
+By construction, the Koopmans correction depends on the screening parameter $\alpha_i$ of each orbital — orbitals with $\alpha_i$ close to 1 are corrected strongly, while orbitals with $\alpha_i$ close to 0 are barely shifted. Inspect the screening parameters that were computed. These are printed in the `.kso` output files of `kcw.x`; you can quickly grab the relevant lines by running
+
+```bash
+grep -r 'alpha =' --include='*.kso'
+```
+
+How do they compare? What does this tell you about how strongly the electrons in a covalent semiconductor like silicon screen?
 
 <details>
 <summary><b>Solution</b></summary>
+
+You should get screening parameters of around 0.2. This is reflective of the fact that electronic screening of charged excitations in silicon is _much_ stronger than it is in molecules such as ozone.
 
 </details>
 
