@@ -139,7 +139,7 @@ Does anything about the Koopmans band structure that you obtain look strange, or
 
 <details>
 <summary><b>Solution</b></summary>
-Look closely at the conduction band minimum (CBM) along the Γ–X segment in `si_bandstructures.png`. Here the band looks looks wiggly: it is not interpolating the bands very well.
+Look closely at the conduction band minimum (CBM) along the Γ–X segment in `si_bandstructures.png`. Here the band looks wiggly: it is not interpolating the bands very well.
 
 </details>
 
