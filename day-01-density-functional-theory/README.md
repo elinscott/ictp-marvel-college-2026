@@ -953,10 +953,7 @@ fig, ax = plt.subplots(figsize=(7, 4))
 ax.fill_between(energy, dos.outputs.dos, alpha=0.25, color='k', label='Total')
 ax.plot(energy, dos.outputs.dos, color='k', lw=0.8)
 
-# Projected DOS: one curve per (atom, angular-momentum) channel.
-# List the NaCl_pdos files explicitly rather than using ProjwfcOutput.from_dir('.'),
-# so we don't accidentally pick up the k-resolved fat-band files from Part G
-# (which share the same pdos_atm#... naming).
+# Projected DOS: one curve per (atom, angular-momentum) channel
 proj = ProjwfcOutput.from_files(pdos_files=glob('NaCl_pdos.pdos_atm*'))
 for rec in proj.outputs.pdos:
     ax.plot(rec['energies'] - efermi, rec['ldos'],
