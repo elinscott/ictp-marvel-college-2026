@@ -21,11 +21,10 @@ The aim is to demystify what a Koopmans calculation actually does: you will comp
 Check that `kcp.x` is found:
 
 ```bash
-workon koopmans
 which kcp.x
 ```
 
-If `which` prints nothing, ask a tutor before continuing.
+If `which` prints nothing, try running `workon koopmans`. If, after that, `which` still prints nothing, ask a tutor before continuing.
 
 ## Problem 2: The neutral ($N$-electron) DFT calculation
 
