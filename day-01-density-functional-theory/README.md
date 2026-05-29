@@ -18,7 +18,7 @@ This session continues from the [preliminary exercise](../before/preliminary-exe
 - `NaCl_conventional.scf.in` — input file for the NaCl conventional 8-atom cell (use for Problem 7)
 - `pseudopotentials/` — pseudopotentials for Na and Cl
 - `script.sh` — example bash script for running a sweep over a parameter
-- `python_utils.py` — helper functions used by the plotting scripts in Problem 9
+- `python_utils.py` — helper functions used by the fat-band plotting script in Problem 9 (Part G)
 
 ---
 
@@ -786,21 +786,29 @@ A minimal Python script:
 
 ```python
 import matplotlib.pyplot as plt
-from python_utils import read_efermi, read_bands_gnu, get_high_symm_points
+from qe_tools.outputs import PwOutput, BandsOutput
 
-efermi = read_efermi('scf.out')   # replace with your SCF output filename
-k_path, energies = read_bands_gnu('NaCl_bands.dat.gnu')
+# E_F = highest occupied level, read from the SCF output
+efermi = PwOutput.from_files(stdout='scf.out').outputs.highest_occupied_level   # replace with your SCF output filename
+
+# Band structure, read from the bands.x output
+bands    = BandsOutput.from_files(gnu='NaCl_bands.dat.gnu', stdout='bands_pp.out')
+k_path   = bands.outputs.k_path_distances   # cumulative k-path coordinate, shape (nk,)
+energies = bands.outputs.eigenvalues        # eigenvalues in eV, shape (nk, nbnd)
 
 fig, ax = plt.subplots(figsize=(5, 7))
 ax.plot(k_path, energies - efermi, 'b-', lw=0.8)
 
 ax.axhline(0, color='k', lw=0.5, ls='--')  # E_F
 
-ks, lbls = get_high_symm_points('bands_pp.out')
-for k in ks:
-    ax.axvline(k, color='k', lw=0.5)
-ax.set_xticks(ks)
-ax.set_xticklabels(lbls)
+# x-positions of the high-symmetry points come straight from bands.x;
+# the labels are the path vertices you chose in Part C, in order
+labels = ['L', r'$\Gamma$', 'X', 'W', 'K', r'$\Gamma$']
+xticks = bands.outputs.high_symmetry_distances
+for x in xticks:
+    ax.axvline(x, color='k', lw=0.5)
+ax.set_xticks(xticks)
+ax.set_xticklabels(labels)
 
 ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_xlim(k_path[0], k_path[-1])
@@ -933,28 +941,22 @@ A minimal Python script that overlays the total DOS and the projected contributi
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import glob
+from qe_tools.outputs import DosOutput, ProjwfcOutput
 
-# Read Fermi energy from the header line of NaCl_dos.dat:
-# "#  E (eV)   dos(E)     Int dos(E) EFermi =    X.XXX eV"
-with open('NaCl_dos.dat') as f:
-    header = f.readline()
-efermi = float(header.split('EFermi =')[1].split()[0])
+# Total DOS (the Fermi energy is read from the .dat header)
+dos    = DosOutput.from_files(dos='NaCl_dos.dat')
+efermi = dos.outputs.fermi_energy
+energy = np.array(dos.outputs.energy) - efermi
 
 fig, ax = plt.subplots(figsize=(7, 4))
+ax.fill_between(energy, dos.outputs.dos, alpha=0.25, color='k', label='Total')
+ax.plot(energy, dos.outputs.dos, color='k', lw=0.8)
 
-# Total DOS
-dos = np.loadtxt('NaCl_dos.dat')
-e = dos[:, 0] - efermi
-ax.fill_between(e, dos[:, 1], alpha=0.25, color='k', label='Total')
-ax.plot(e, dos[:, 1], color='k', lw=0.8)
-
-# Projected DOS
-for pdos_file in sorted(glob.glob('NaCl_pdos.pdos_atm*')):
-    atom    = pdos_file.split('(')[1].split(')')[0]   # e.g. 'Na'
-    orbital = pdos_file.split('(')[-1].rstrip(')\n')  # e.g. 's' or 'p'
-    pdos = np.loadtxt(pdos_file)
-    ax.plot(pdos[:, 0] - efermi, pdos[:, 1], lw=0.8, label=f'{atom} {orbital}')
+# Projected DOS: one curve per (atom, angular-momentum) channel
+proj = ProjwfcOutput.from_dir('.')
+for rec in proj.outputs.pdos:
+    ax.plot(rec['energies'] - efermi, rec['ldos'],
+            lw=0.8, label=f"{rec['element']} {rec['l_label']}")
 
 ax.axvline(0, color='k', lw=0.5, ls='--')
 ax.set_xlabel('$E - E_F$ (eV)')
