@@ -640,7 +640,7 @@ These are all ground-state properties, for which DFT is generally reliable. For 
 
 ---
 
-## Problem 9: Band structure
+## Problem 9: Band structure [OPTIONAL]
 
 The total energy, bulk modulus, and elastic constants all probe the electronic structure through ground-state properties. To understand optical absorption, conductivity, and spectroscopic signatures, we need the **band structure** — the dispersion relation $E_n(\mathbf{k})$ of the Kohn–Sham eigenvalues across the Brillouin zone.
 
@@ -857,7 +857,7 @@ Analyse your band structure.
 
 </details>
 
-### Part F [OPTIONAL]: Density of states
+### Part F: Density of states
 
 The band structure shows how eigenvalues disperse along particular paths in reciprocal space. The **density of states** (DOS) $g(E)$ instead sums contributions from *all* **k**-points,
 
@@ -989,7 +989,7 @@ The total DOS shows distinct groups of peaks separated by gaps. Working from low
 
 </details>
 
-### Part G [OPTIONAL]: Fat bands
+### Part G: Fat bands
 
 A **fat band** plot overlays the orbital character on the band structure: each point $(k, E_n(\mathbf{k}))$ is drawn with a symbol whose area is proportional to the projection weight $\sum_{m_l} |\langle \phi_{\alpha,l,m_l} | \psi_{n\mathbf{k}} \rangle|^2$ onto a chosen atomic orbital $(\alpha, l)$. This makes the orbital character immediately visible without relying on colour-coded energy windows.
 
@@ -1114,7 +1114,7 @@ The sharp separation of atomic-orbital character between bands confirms the stro
 
 </details>
 
-### Part G (alternative) [OPTIONAL]: Fat bands from projection weights
+### Part G (alternative): Fat bands from projection weights
 
 The intensity map above sidesteps the fact that the k-resolved pdos files give a *density* $\text{ldos}(\mathbf{k}, E)$ rather than a weight per band. A more literal fat-band plot instead draws each band $E_n(\mathbf{k})$ — taken directly from the `bands.x` output — as a line whose **opacity is proportional to the projection weight** onto a chosen orbital. This shows the band dispersion explicitly instead of as a blurred intensity, at the price of needing the per-band weights.
 
