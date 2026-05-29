@@ -67,7 +67,7 @@ Inspect `si_bandstructure.png`. Do the interpolated bands lie on top of the expl
 <details>
 <summary><b>Solution</b></summary>
 
-YOu should see some fairly substantial discrepancies between the actual and interpolated bands. This is because our calculation is underconverged.
+You should see some fairly substantial discrepancies between the actual and interpolated bands. This is because our calculation is underconverged.
 
 To fix this, one would typically increase the size of the _**k**_-point mesh
 
