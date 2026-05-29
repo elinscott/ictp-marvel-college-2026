@@ -371,7 +371,7 @@ Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan i
 > import numpy as np
 > from scipy.optimize import curve_fit
 >
-> def birch_murnaghan(x, e0, v0, b0, db0):
+> def birch_murnaghan(x, v0, e0, b0, db0):
 >     x23 = (v0/x)**(2/3)
 >     return e0 + 9*v0*b0/16*(db0*(x23 - 1)**3 + (x23 - 1)**2 * (6 - 4 * x23))
 >
@@ -380,7 +380,7 @@ Calculate the bulk modulus *B* of NaCl using the third-order Birch–Murnaghan i
 > energies = np.array([...])
 >
 > # fit E(V) to obtain the equation-of-state parameters
-> (e0, v0, b0, db0), _ = curve_fit(birch_murnaghan, volumes, energies)
+> (v0, e0, b0, db0), _ = curve_fit(birch_murnaghan, volumes, energies, p0=(volumes[0], energies[0], 1, 1))
 > print(f'B = {b0}')
 > ```
 > 
