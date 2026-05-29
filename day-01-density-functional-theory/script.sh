@@ -36,7 +36,7 @@ for ecut in $ecuts; do
    tstress          = .true.
    tprnfor          = .true.
    outdir           = '$tmp_dir'
-   prefix           = 'NaCl.$ecut'
+   prefix           = 'NaCl.ecut=$ecut'
    pseudo_dir       = '$pseudo_dir'
 /
 &SYSTEM
@@ -78,4 +78,4 @@ EOF
 done
 
 # Clean up temporary files created during calculations
-rm -r "$tmp_dir"/*
+find "$tmp_dir" -type f ! -name '*.xml' -delete
