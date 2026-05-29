@@ -225,7 +225,14 @@ So far you have only looked at the HOMO and LUMO. The KI functional in fact pred
 
 The [`plot_spectrum.ipynb`](plot_spectrum.ipynb) notebook contains experimental binding energies (in eV) for the outermost three occupied orbitals of ozone[^Mocellin2003].
 
-Complete the notebook. It loads `ozone.pkl`, extracts both the KI and the PBE orbital eigenvalues, converts them into binding energies, and plots them against the experimental values. Open the notebook, fill in the cells marked `TODO`, and run all the cells to produce the comparison plot. The notebook also includes cells for inspecting `wf.calculations[-1].results`, which will help you work out where the eigenvalues are stored.
+Complete the notebook. It loads `ozone.pkl`, extracts both the KI and the PBE orbital eigenvalues, converts them into binding energies, and plots them against the experimental values. Open the notebook, fill in the cells marked `TODO`, and run all the cells to produce the comparison plot.
+
+<details>
+<summary><b>Solution</b></summary>
+
+![Scatter plot comparing KI and PBE orbital binding energies against experiment](solutions/scatter.png)
+
+</details>
 
 ## Problem 7: Molecular oxygen [OPTIONAL]
 
