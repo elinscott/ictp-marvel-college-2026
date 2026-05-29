@@ -778,7 +778,7 @@ Create an input file:
 /
 ```
 
-and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV (absolute, **not** shifted to the Fermi level) — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`. To set $E_F = 0$, use the highest occupied level reported by `pw.x` in the SCF output (look for the line `highest occupied, lowest unoccupied level (eV)` and take the first value).
+and run `bands.x < bands_pp.in > bands_pp.out`. The program writes several files; `NaCl_bands.dat.gnu` is the easiest to plot. It contains two columns — the **k**-coordinate (cumulative arc-length in reciprocal space) and the energy in eV (absolute, **not** shifted to the Fermi level) — with blank lines separating successive bands. The **k**-coordinates of the high-symmetry points are printed in `bands_pp.out`. To set $E_F = 0$, use the highest occupied level reported by `pw.x` in the SCF output (the `highest occupied, lowest unoccupied level (eV)` line; the script below reads it for you).
 
 #### Step 2 — Plot the band structure
 
@@ -1037,7 +1037,7 @@ The association between a block in `projwfc_up` and a pdos file is determined by
 
 Note that multiple global indices sharing the same $(n,l)$ group (different $m_l$) all map to the **same** pdos file: the `ldos` column of that file is their sum.
 
-Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p bands at $\Gamma$), extracting discrete eigenvalues by peak-finding is unreliable. Instead, the k-resolved `ldos` column of the pdos file is plotted directly as a two-dimensional intensity map — energy on the $y$-axis, k-point index on the $x$-axis — which is equivalent to fat bands and handles degeneracies naturally. The k-path $x$-coordinates are the same ones computed from `NaCl_bands.dat.gnu` in Part D; the k-point index `ik` (1-based) maps directly to position `ik − 1` in that array.
+Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p bands at $\Gamma$), extracting discrete eigenvalues by peak-finding is unreliable. Instead, the k-resolved `ldos` column of the pdos file is plotted directly as a two-dimensional intensity map — energy on the $y$-axis, k-point index on the $x$-axis — which is equivalent to fat bands and handles degeneracies naturally. The k-path $x$-coordinates are the same ones read from `NaCl_bands.dat.gnu` in Part D; the k-point index `ik` (1-based) maps directly to position `ik − 1` in that array.
 
 To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Part D.
 
