@@ -845,7 +845,7 @@ Analyse your band structure.
    - **1 isolated band** at intermediate energy (tentatively Cl 3s)
    - **3 dispersive bands** forming the top of the valence manifold (tentatively Cl 3p)
 
-   The atomic-orbital character of each group cannot be read off from the band structure alone. We can guess at what they might be based on their multiplicity, but the character can be rigorously identified using the projected DOS in Part F and confirmed with the fat-band plot in Part G.
+   The atomic-orbital character of each group cannot be read off from the band structure alone. We can guess at what they might be based on their multiplicity, but the character can be rigorously identified using the projected DOS (Problem 10) and confirmed with the fat-band plot (Problem 11).
 
 3. The **VBM** is at **Γ**, where three bands are degenerate.
 
@@ -857,7 +857,7 @@ Analyse your band structure.
 
 </details>
 
-### Part F: Density of states
+## Problem 10: Density of states [OPTIONAL]
 
 The band structure shows how eigenvalues disperse along particular paths in reciprocal space. The **density of states** (DOS) $g(E)$ instead sums contributions from *all* **k**-points,
 
@@ -871,7 +871,7 @@ To compute the DOS accurately you need a *uniform* sampling of the Brillouin zon
 >
 > **Back up the bands save directory before proceeding.**
 >
-> `pw.x` uses `outdir/prefix.save/` both to **read** data from previous steps and to **write** new results. The NSCF calculation below must use the same `prefix` and `outdir` as the SCF (so that it can read the self-consistent charge density), but it will **overwrite** `data-file-schema.xml` and the wavefunction files with NSCF data, destroying the information needed by `projwfc.x` in Part G.
+> `pw.x` uses `outdir/prefix.save/` both to **read** data from previous steps and to **write** new results. The NSCF calculation below must use the same `prefix` and `outdir` as the SCF (so that it can read the self-consistent charge density), but it will **overwrite** `data-file-schema.xml` and the wavefunction files with NSCF data, destroying the information needed by `projwfc.x` in Problem 11.
 >
 > Before running the NSCF, copy the entire save directory:
 >
@@ -879,13 +879,13 @@ To compute the DOS accurately you need a *uniform* sampling of the Brillouin zon
 > cp -r tmp/NaCl.save tmp/NaCl_bands.save
 > ```
 >
-> To run Part G later, restore it with:
+> To run Problem 11 later, restore it with:
 >
 > ```bash
 > cp -r tmp/NaCl_bands.save/* tmp/NaCl.save/
 > ```
 
-#### Step 1 — Dense NSCF calculation
+### Part A: Dense NSCF calculation
 
 Run `pw.x` with `calculation = 'nscf'`, using the same `prefix` and `outdir` as your SCF calculation. For an insulator, the **tetrahedron method** avoids artificial broadening and gives the most accurate DOS. Use a dense, uniform **k**-point grid (e.g. 12×12×12):
 
@@ -903,7 +903,7 @@ K_POINTS automatic
 >
 > If `occupations = 'tetrahedra_opt'` causes convergence issues, replace it with Gaussian smearing (`occupations = 'smearing'`, `smearing = 'gaussian'`, `degauss = 0.005`). The resulting broadening of 0.005 Ry ≈ 0.07 eV is far smaller than the band gap and will not obscure it.
 
-#### Step 2 — Total DOS with `dos.x`
+### Part B: Total DOS with `dos.x`
 
 Create an input file:
 
@@ -918,7 +918,7 @@ Create an input file:
 
 Run `dos.x < dos.in > dos.out`. The file `NaCl_dos.dat` has three columns: energy (eV), DOS (states/eV/cell), and integrated DOS (states/cell). Its first line is a comment header that also contains the Fermi energy, e.g. `#  E (eV)   dos(E)     Int dos(E) EFermi =    1.188 eV`.
 
-#### Step 3 — Projected DOS with `projwfc.x`
+### Part C: Projected DOS with `projwfc.x`
 
 For a richer picture, compute the DOS projected onto atomic orbitals:
 
@@ -933,7 +933,7 @@ For a richer picture, compute the DOS projected onto atomic orbitals:
 
 Run `projwfc.x < projwfc.in > projwfc.out`. The program writes one file per angular-momentum channel per atom (e.g. `NaCl_pdos.pdos_atm#1(Na)_wfc#1(s)`, `NaCl_pdos.pdos_atm#2(Cl)_wfc#2(p)`, ...). Each file contains two columns: energy and the local DOS for that channel (sum over $m_l$), followed by individual $m_l$ components.
 
-#### Step 4 — Plot
+### Part D: Plot
 
 A minimal Python script that overlays the total DOS and the projected contributions:
 
@@ -971,29 +971,29 @@ plt.savefig('NaCl_dos.png', dpi=150)
 plt.show()
 ```
 
-Identify the groups of peaks in the DOS and relate them to the bands you saw in Part E. Which bands give the sharpest peaks? Why?
+Identify the groups of peaks in the DOS and relate them to the bands you saw in Problem 9. Which bands give the sharpest peaks? Why?
 
 <details>
 <summary><b>Solution</b></summary>
 
 ![NaCl density of states](solutions/NaCl_dos.png)
 
-The total DOS shows distinct groups of peaks separated by gaps. Working from low to high energy (and matching them to the four band groups identified in Part E):
+The total DOS shows distinct groups of peaks separated by gaps. Working from low to high energy (and matching them to the four band groups identified in Problem 9):
 
-- **Na 2s**: a very deep semicore peak that sits below the lower edge of the plotted energy window (extend `set_xlim` if you want to see it). It corresponds to the lowest, flattest band of Part E.
+- **Na 2s**: a very deep semicore peak that sits below the lower edge of the plotted energy window (extend `set_xlim` if you want to see it). It corresponds to the lowest, flattest band in Problem 9.
 - **Na 2p**: a sharp peak from the three-fold Na 2p manifold; nearly dispersionless across the BZ (the 2p semicore orbital barely overlaps with neighbours), so many states pile up at almost the same energy — a classic **van Hove singularity**.
 - **Cl 3s**: a sharp peak from the isolated, narrow band.
 - **Cl 3p (valence band)**: three broader, strongly overlapping peaks forming the top of the valence manifold. The Cl 3p orbitals have larger spatial extent and stronger inter-site hopping than the Na semicore states, leading to greater bandwidth and smoother features.
-- **Gap** above $E_F$, consistent with the band structure in Part E.
+- **Gap** above $E_F$, consistent with the band structure in Problem 9.
 - **Conduction band** starting just above the gap, with initial Na 3s character.
 
 </details>
 
-### Part G: Fat bands
+## Problem 11: Fat bands [OPTIONAL]
 
 A **fat band** plot overlays the orbital character on the band structure: each point $(k, E_n(\mathbf{k}))$ is drawn with a symbol whose area is proportional to the projection weight $\sum_{m_l} |\langle \phi_{\alpha,l,m_l} | \psi_{n\mathbf{k}} \rangle|^2$ onto a chosen atomic orbital $(\alpha, l)$. This makes the orbital character immediately visible without relying on colour-coded energy windows.
 
-Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh from Part F) with `kresolveddos = .true.`:
+Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh from Problem 10) with `kresolveddos = .true.`:
 
 ```text
 &PROJWFC
@@ -1006,9 +1006,7 @@ Run `projwfc.x` on the **bands** calculation (the k-path, not the uniform mesh f
 
 The program writes two kinds of output file.
 
-#### Projection weights
-
-These are written to `NaCl_fatbands.projwfc_up`. After several system-information header lines, the file contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
+**Projection weights** are written to `NaCl_fatbands.projwfc_up`. After several system-information header lines, the file contains a sequence of blocks, one per atomic wavefunction. Each block starts with a one-line label:
 
 ```text
 global_idx  atom_idx  element  orbital_label  n  l  m
@@ -1016,9 +1014,7 @@ global_idx  atom_idx  element  orbital_label  n  l  m
 
 where `global_idx` is a global sequential counter, `atom_idx` is the atom number in the input, `orbital_label` is a human-readable name (e.g. `2S`, `3P`), and `n`, `l`, `m` are the principal, angular-momentum, and magnetic quantum numbers. The key line in the full header (before the blocks) reads `nwfc nk nbnd`. Each block then contains `nk × nbnd` lines of the form `ik  ibnd  weight`, where `weight` $= |\langle\phi_{\alpha,l,m}|\psi_{n\mathbf{k}}\rangle|^2$.
 
-#### K-resolved projected DOS
-
-These are written to `NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)`, one file per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
+**K-resolved projected DOS** files are written to `NaCl.pdos_atm#<a>(<El>)_wfc#<w>(<orb>)`, one file per $(n,l)$ channel per atom. The file for the $w$-th wavefunction channel of atom $a$ is named with the atom index $a$, element symbol, sequential wavefunction index $w$ (counting $(n,l)$ groups for that atom in order of appearance), and the orbital character (`s`, `p`, `d`, ...). Columns are: `ik  E(eV)  ldos  pdos(m=1)  pdos(m=2) ...`, where `ldos` is the sum over all $m_l$ and the subsequent columns give individual $m_l$ contributions. The energy grid is the same for all k-points.
 
 The association between a block in `projwfc_up` and a pdos file is determined by `atom_idx`, `l`, and the sequential index of the $(n,l)$ group within that atom. For NaCl the full table is:
 
@@ -1036,9 +1032,11 @@ The association between a block in `projwfc_up` and a pdos file is determined by
 
 Note that multiple global indices sharing the same $(n,l)$ group (different $m_l$) all map to the **same** pdos file: the `ldos` column of that file is their sum.
 
-Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p bands at $\Gamma$), extracting discrete eigenvalues by peak-finding is unreliable. Instead, the k-resolved `ldos` column of the pdos file is plotted directly as a two-dimensional intensity map — energy on the $y$-axis, k-point index on the $x$-axis — which is equivalent to fat bands and handles degeneracies naturally. The k-path $x$-coordinates are the same ones read from `NaCl_bands.dat.gnu` in Part D; the k-point index `ik` (1-based) maps directly to position `ik − 1` in that array.
+### Part A: From the k-resolved DOS
 
-To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Part D.
+Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p bands at $\Gamma$), extracting discrete eigenvalues by peak-finding is unreliable. Instead, the k-resolved `ldos` column of the pdos file is plotted directly as a two-dimensional intensity map — energy on the $y$-axis, k-point index on the $x$-axis — which is equivalent to fat bands and handles degeneracies naturally. The k-path $x$-coordinates are the same ones read from `NaCl_bands.dat.gnu` in Problem 9 (Part D); the k-point index `ik` (1-based) maps directly to position `ik − 1` in that array.
+
+To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Problem 9 (Part D).
 
 Below is a complete example for **Cl 3p**.
 
@@ -1083,7 +1081,7 @@ ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(e_min, e_max)
 ax.set_xlim(k_path[0], k_path[-1])
 
-# High-symmetry points: x-positions from bands.x, labels in path order (as in Part D)
+# High-symmetry points: x-positions from bands.x, labels in path order (as in Problem 9)
 labels = ['L', 'Γ', 'X', 'W', 'K', 'Γ']
 xticks = bands.outputs.high_symmetry_distances
 for x in xticks:
@@ -1114,11 +1112,11 @@ The sharp separation of atomic-orbital character between bands confirms the stro
 
 </details>
 
-### Part G (alternative): Fat bands from projection weights
+### Part B: From projection weights
 
-The intensity map above sidesteps the fact that the k-resolved pdos files give a *density* $\text{ldos}(\mathbf{k}, E)$ rather than a weight per band. A more literal fat-band plot instead draws each band $E_n(\mathbf{k})$ — taken directly from the `bands.x` output — as a line whose **opacity is proportional to the projection weight** onto a chosen orbital. This shows the band dispersion explicitly instead of as a blurred intensity, at the price of needing the per-band weights.
+In this approach each band $E_n(\mathbf{k})$ — taken directly from the `bands.x` output — is drawn as a line whose **opacity is proportional to the projection weight** onto a chosen orbital. The band dispersion is shown explicitly, at the price of needing a projection weight for each individual band.
 
-Those weights are exactly what `projwfc.x` writes to `NaCl_fatbands.projwfc_up` (the `filproj` output): for each atomic wavefunction, a block of `ik ibnd weight` lines. `qe-tools` does not parse this file, so we read it with a small helper, selecting one `(atom, wfc)` channel and summing the weight over its $m$ components. The band energies and high-symmetry points come from `BandsOutput`, just as in Part D.
+Those weights are exactly what `projwfc.x` writes to `NaCl_fatbands.projwfc_up` (the `filproj` output): for each atomic wavefunction, a block of `ik ibnd weight` lines. `qe-tools` does not parse this file, so we read it with a small helper, selecting one `(atom, wfc)` channel and summing the weight over its $m$ components. The band energies and high-symmetry points come from `BandsOutput`, just as in Problem 9 (Part D).
 
 ```python
 import re
@@ -1188,7 +1186,7 @@ plt.savefig('NaCl_fatbands_Cl_p_lines.png', dpi=150)
 plt.show()
 ```
 
-As before, extend the script to overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) in different colours, and widen `set_ylim` to reach their deeper energies. The physical conclusions are the same as in Part G above — only the visualisation differs.
+Extend the script to overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) in different colours, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
 
 ---
 
