@@ -253,6 +253,8 @@ Update...
 
 as well as the list of atoms and their coordinates.
 
+A full input file can be found [here](solutions/o2.json). It gives an IP and EA of 11.78 and 0.45 eV respectively; cf. the experimental values of 12.07 and 0.45 eV[^NIST-O2].
+
 </details>
 
 ## Problem 9: Take-aways
