@@ -1040,11 +1040,7 @@ Because some bands are degenerate at high-symmetry points (e.g. the three Cl 3p 
 
 To set $E_F = 0$, use the highest occupied level from the SCF `pw.x` output, as in Part D.
 
-Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **Na 2p** on the same axes using different colour maps.
-
-> [!NOTE]
->
-> Each orbital has weight in a different energy region, so a single energy window may not show all characters well. When focusing on a specific orbital, tighten the window: the energy mask is set on the line starting `emask = ...` and the axis limits on `ax.set_ylim(...)`. For example, Na 2p character sits around −20 to −15 eV and would require widening both lines accordingly.
+Below is a complete example for **Cl 3p**.
 
 ```python
 import numpy as np
@@ -1067,9 +1063,9 @@ def load_kdos(pdos_file):
 # --- Cl 3p ---
 Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)')
 
-# Restrict to a useful energy window
-# Focus on the Cl 3p region; adjust limits when overlaying other orbitals
-emask = (Egrid - efermi >= -8) & (Egrid - efermi <= 5)
+# Restrict to a useful energy window (adjust when overlaying other orbitals)
+e_min, e_max = -3, 1
+emask = (Egrid - efermi >= e_min) & (Egrid - efermi <= e_max)
 E_plot  = Egrid[emask] - efermi
 K, Emesh = np.meshgrid(k_path, E_plot)
 
@@ -1084,7 +1080,7 @@ ax.pcolormesh(K, Emesh, cl_p[:, emask].T,
 
 ax.axhline(0, color='k', lw=0.5, ls='--')
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_ylim(-8, 5)
+ax.set_ylim(e_min, e_max)
 ax.set_xlim(k_path[0], k_path[-1])
 
 # High-symmetry points: x-positions from bands.x, labels in path order (as in Part D)
