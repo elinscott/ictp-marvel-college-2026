@@ -6,6 +6,16 @@
   gather_facts: false
   tasks:
 
-  - name: Greet
-    ansible.builtin.debug:
-      msg: "Hello from the post-distribution playbook!"
+  - name: Check if pint is installed in the qe conda env
+    become_user: max
+    ansible.builtin.stat:
+      path: ~/.conda/envs/qe/lib/python3.13/site-packages/pint/__init__.py
+    register: pint_installed
+
+  - name: Install qe-tools (alpha + pint extra) into the qe conda env
+    become_user: max
+    ansible.builtin.command:
+      cmd: >
+        ~/.conda/envs/qe/bin/pip install --upgrade --pre qe-tools[pint]
+    when: not pint_installed.stat.exists
+    changed_when: true
