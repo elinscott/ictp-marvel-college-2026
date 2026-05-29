@@ -18,7 +18,6 @@ This session continues from the [preliminary exercise](../before/preliminary-exe
 - `NaCl_conventional.scf.in` — input file for the NaCl conventional 8-atom cell (use for Problem 7)
 - `pseudopotentials/` — pseudopotentials for Na and Cl
 - `script.sh` — example bash script for running a sweep over a parameter
-- `python_utils.py` — helper functions used by the fat-band plotting script in Problem 9 (Part G)
 
 ---
 
@@ -1050,15 +1049,23 @@ Below is a complete example for **Cl 3p**. Extend it to overlay **Na 2s** and **
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from python_utils import read_efermi, read_bands_gnu, get_high_symm_points, load_kdos
+from qe_tools.outputs import PwOutput, BandsOutput
 
-efermi = read_efermi('scf.out')        # replace with your SCF output filename
+efermi = PwOutput.from_files(stdout='scf.out').outputs.highest_occupied_level  # replace with your SCF output filename
 
-k_path, _ = read_bands_gnu('NaCl_bands.dat.gnu')
-nk = len(k_path)
+bands  = BandsOutput.from_files(gnu='NaCl_bands.dat.gnu', stdout='bands_pp.out')
+k_path = bands.outputs.k_path_distances
+
+# qe-tools cannot yet parse k-resolved (kresolveddos) pdos files, so read them by hand.
+# Columns are: ik  E(eV)  ldos  ...; rows run over all energies for ik=1, then ik=2, ...
+def load_kdos(pdos_file):
+    d = np.genfromtxt(pdos_file, comments='#')
+    nk = int(d[:, 0].max())
+    Egrid = d[d[:, 0] == 1, 1]
+    return Egrid, d[:, 2].reshape(nk, len(Egrid))   # intensity[ik-1, iE]
 
 # --- Cl 3p ---
-Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)', nk)
+Egrid, cl_p = load_kdos('NaCl.pdos_atm#2(Cl)_wfc#2(p)')
 
 # Restrict to a useful energy window
 # Focus on the Cl 3p region; adjust limits when overlaying other orbitals
@@ -1080,11 +1087,13 @@ ax.set_ylabel('$E - E_F$ (eV)')
 ax.set_ylim(-8, 5)
 ax.set_xlim(k_path[0], k_path[-1])
 
-ks, lbls = get_high_symm_points('bands_pp.out')
-for k in ks:
-    ax.axvline(k, color='k', lw=0.5)
-ax.set_xticks(ks)
-ax.set_xticklabels(lbls)
+# High-symmetry points: x-positions from bands.x, labels in path order (as in Part D)
+labels = ['L', 'Γ', 'X', 'W', 'K', 'Γ']
+xticks = bands.outputs.high_symmetry_distances
+for x in xticks:
+    ax.axvline(x, color='k', lw=0.5)
+ax.set_xticks(xticks)
+ax.set_xticklabels(labels)
 
 plt.tight_layout()
 plt.savefig('NaCl_fatbands_Cl_p.png', dpi=150)
