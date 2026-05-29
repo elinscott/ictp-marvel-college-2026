@@ -1,18 +1,17 @@
 &CONTROL
    calculation      = 'cp'
    verbosity        = 'low'
-   restart_mode     = 'from_scratch'
+   restart_mode     = 'restart'
    iprint           = 1
    outdir           = 'TMP'
    prefix           = 'kc'
    disk_io          = 'high'
    pseudo_dir       = 'pseudopotentials/'
    ndr              = 90
-   ndw              = 90
+   ndw              = 80
 /
 &SYSTEM
    ibrav            = 0
-   nbnd             = 10
    tot_charge       = 0
    ecutwfc          = 50.0
    nspin            = 2
@@ -23,9 +22,13 @@
    neldw            = 9
    ntyp             = 1
    nat              = 3
+   !
+   fixed_state      = .true.
+   fixed_band       = 9
+   f_cutoff         = 1e-05
 /
 &ELECTRONS
-   conv_thr         = 1.8000000000000002e-08
+   conv_thr         = 1.8000000000000001e-06
    ortho_para       = 1
    maxiter          = 300
    empty_states_maxstep = 300
@@ -34,8 +37,9 @@
    do_outerloop     = .true.
    do_outerloop_empty = .true.
 /
-$IONS
+&IONS
    ion_dynamics     = 'none'
+   ion_radius(1)    = 1.0
 /
 &EE
    which_compensation = 'tcc'
