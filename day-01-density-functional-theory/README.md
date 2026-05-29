@@ -955,9 +955,11 @@ ax.plot(energy, dos.outputs.dos, color='k', lw=0.8)
 
 # Projected DOS: one curve per (atom, angular-momentum) channel
 proj = ProjwfcOutput.from_files(pdos_files=glob('NaCl_pdos.pdos_atm*'))
-for rec in proj.outputs.pdos:
+shells = {('Na', 1): '2s', ('Na', 2): '2p', ('Na', 3): '3s',
+          ('Cl', 1): '3s', ('Cl', 2): '3p'}
+for rec in sorted(proj.outputs.pdos, key=lambda r: (r['atom'], r['wfc'])):
     ax.plot(rec['energies'] - efermi, rec['ldos'],
-            lw=0.8, label=f"{rec['element']} {rec['l_label']} (wfc {rec['wfc']})")
+            lw=0.8, label=f"{rec['element']} {shells[rec['element'], rec['wfc']]}")
 
 ax.axvline(0, color='k', lw=0.5, ls='--')
 ax.set_xlabel('$E - E_F$ (eV)')
