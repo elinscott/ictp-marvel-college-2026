@@ -1123,7 +1123,6 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
-from matplotlib.colors import to_rgba
 from qe_tools.outputs import PwOutput, BandsOutput
 
 efermi = PwOutput.from_files(stdout='scf.out').outputs.highest_occupied_level  # replace with your SCF output filename
@@ -1154,14 +1153,12 @@ def load_weights(filename, atom, wfc):
 # Draw every band as a line whose opacity tracks one channel's projection weight.
 # Call it once per (atom, wfc) channel, with a different colour each time.
 def add_fatband(ax, k_path, y, weight, color):
-    r, g, b, _ = to_rgba(color)
-    wmax = weight.max()
     for n in range(y.shape[1]):
         points   = np.column_stack([k_path, y[:, n]])
         segments = np.stack([points[:-1], points[1:]], axis=1)
-        rgba = np.tile([r, g, b, 0.0], (len(segments), 1))
-        rgba[:, 3] = np.clip(0.5 * (weight[:-1, n] + weight[1:, n]) / wmax, 0, 1)  # alpha
-        ax.add_collection(LineCollection(segments, colors=rgba, linewidths=3))
+        lc = LineCollection(segments, colors=color, linewidths=3)
+        lc.set_alpha(0.5 * (weight[:-1, n] + weight[1:, n]))  # per-segment opacity = weight (in [0, 1])
+        ax.add_collection(lc)
 
 y = energies - efermi
 
@@ -1172,7 +1169,7 @@ add_fatband(ax, k_path, y, load_weights('NaCl_fatbands.projwfc_up', atom=2, wfc=
 
 ax.axhline(0, color='k', lw=0.5, ls='--')
 ax.set_ylabel('$E - E_F$ (eV)')
-ax.set_ylim(-3, 1)
+ax.set_ylim(-5, 10)
 ax.set_xlim(k_path[0], k_path[-1])
 
 labels = ['L', 'Γ', 'X', 'W', 'K', 'Γ']
@@ -1187,7 +1184,7 @@ plt.savefig('NaCl_fatbands_Cl_p_lines.png', dpi=150)
 plt.show()
 ```
 
-Overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) by adding two more `add_fatband(...)` calls in different colours, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
+Overlay **Na 2s** and **Na 2p** by modifying the above plot, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
 
 ---
 
