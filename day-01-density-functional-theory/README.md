@@ -1186,6 +1186,13 @@ plt.show()
 
 Overlay **Na 2s** and **Na 2p** by modifying the above plot, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
 
+<details>
+<summary><b>Solution</b></summary>
+
+![NaCl fat bands — Cl 3p, Na 2s and Na 2p overlaid as alpha-weighted lines](solutions/NaCl_fatbands_all_lines.png)
+
+</details>
+
 ---
 
 ## References
