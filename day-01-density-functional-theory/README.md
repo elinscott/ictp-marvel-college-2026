@@ -1123,6 +1123,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+from matplotlib.colors import to_rgba
 from qe_tools.outputs import PwOutput, BandsOutput
 
 efermi = PwOutput.from_files(stdout='scf.out').outputs.highest_occupied_level  # replace with your SCF output filename
@@ -1150,24 +1151,24 @@ def load_weights(filename, atom, wfc):
     np.add.at(weight, (ik - 1, ibnd - 1), w)   # sum over m
     return weight
 
-# --- Cl 3p (atom 2, wfc 2) ---
-weight = load_weights('NaCl_fatbands.projwfc_up', atom=2, wfc=2)
+# Draw every band as a line whose opacity tracks one channel's projection weight.
+# Call it once per (atom, wfc) channel, with a different colour each time.
+def add_fatband(ax, k_path, y, weight, color):
+    r, g, b, _ = to_rgba(color)
+    wmax = weight.max()
+    for n in range(y.shape[1]):
+        points   = np.column_stack([k_path, y[:, n]])
+        segments = np.stack([points[:-1], points[1:]], axis=1)
+        rgba = np.tile([r, g, b, 0.0], (len(segments), 1))
+        rgba[:, 3] = np.clip(0.5 * (weight[:-1, n] + weight[1:, n]) / wmax, 0, 1)  # alpha
+        ax.add_collection(LineCollection(segments, colors=rgba, linewidths=3))
+
 y = energies - efermi
 
 fig, ax = plt.subplots(figsize=(5, 7))
+ax.plot(k_path, y, color='0.85', lw=0.5, zorder=0)   # faint bare bands
 
-# faint bare bands so that zero-weight bands stay visible
-ax.plot(k_path, y, color='0.85', lw=0.5, zorder=0)
-
-# overlay each band as a line whose opacity tracks the projection weight
-wmax = weight.max()
-for n in range(y.shape[1]):
-    points   = np.column_stack([k_path, y[:, n]])
-    segments = np.stack([points[:-1], points[1:]], axis=1)
-    rgba = np.zeros((len(segments), 4))
-    rgba[:, 0] = 0.85                                                  # red
-    rgba[:, 3] = np.clip(0.5 * (weight[:-1, n] + weight[1:, n]) / wmax, 0, 1)  # alpha
-    ax.add_collection(LineCollection(segments, colors=rgba, linewidths=3))
+add_fatband(ax, k_path, y, load_weights('NaCl_fatbands.projwfc_up', atom=2, wfc=2), 'red')  # Cl 3p
 
 ax.axhline(0, color='k', lw=0.5, ls='--')
 ax.set_ylabel('$E - E_F$ (eV)')
@@ -1186,7 +1187,7 @@ plt.savefig('NaCl_fatbands_Cl_p_lines.png', dpi=150)
 plt.show()
 ```
 
-Extend the script to overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) in different colours, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
+Overlay **Na 2s** (`atom=1, wfc=1`) and **Na 2p** (`atom=1, wfc=2`) by adding two more `add_fatband(...)` calls in different colours, widening `set_ylim` to reach their deeper energies. Each orbital's weight is confined to a distinct group of bands, revealing the strongly ionic character of NaCl.
 
 ---
 
